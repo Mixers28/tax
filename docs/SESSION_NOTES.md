@@ -4,10 +4,6 @@
 > Append-only. Do not delete past sessions.
 
 ---
-Note: older entries may reference MCP terminology; this is deprecated. Use
-`docs/PERSISTENT_AGENT_WORKFLOW.md` as the current source of truth.
-
----
 
 ## Example Entry
 
@@ -17,8 +13,8 @@ Note: older entries may reference MCP terminology; this is deprecated. Use
 **Branch:** main  
 
 ### What we worked on
-- Set up the persistent agent workflow system.
-- Added session helper scripts and VS Code tasks.
+- Set up local MCP-style context system.
+- Added handoffkit CLI and VS Code tasks.
 - Defined PROJECT_CONTEXT / NOW / SESSION_NOTES workflow.
 
 ### Files touched
@@ -26,9 +22,9 @@ Note: older entries may reference MCP terminology; this is deprecated. Use
 - docs/NOW.md
 - docs/SESSION_NOTES.md
 - docs/AGENT_SESSION_PROTOCOL.md
-- docs/PERSISTENT_AGENT_WORKFLOW.md
-- scripts/session-helper.ps1
-- scripts/commit-session.ps1
+- docs/MCP_LOCAL_DESIGN.md
+- handoffkit/__main__.py
+- pyproject.toml
 - .vscode/tasks.json
 
 ### Outcomes / Decisions

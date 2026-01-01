@@ -1,22 +1,24 @@
-persistent-agent-workflow/
+local-mcp-context-kit/
 ├── docs/
 │   ├── PROJECT_CONTEXT.md
 │   ├── NOW.md
 │   ├── SESSION_NOTES.md
 │   ├── AGENT_SESSION_PROTOCOL.md
-│   ├── PERSISTENT_AGENT_WORKFLOW.md
 │   ├── MCP_LOCAL_DESIGN.md
-├── extensions/
-│   ├── codex/
-├── scripts/
-│   ├── session-helper.ps1
-│   ├── commit-session.ps1
-│   ├── session-helper.sh
-│   ├── commit-session.sh
+├── handoffkit/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── handoffkit.config.json
+│   ├── templates/
+│   │   ├── architect.md
+│   │   ├── coder.md
+│   │   ├── polish.md
+│   │   ├── qa_tester.md
+│   │   ├── reviewer.md
 ├── .vscode/
 │   ├── tasks.json
+├── README.md
 ├── REPO_README.md
+├── handoffkit.config.json
+├── pyproject.toml
 ├── .gitignore
-
-Notes:
-- `docs/MCP_LOCAL_DESIGN.md` is deprecated; use `docs/PERSISTENT_AGENT_WORKFLOW.md`.

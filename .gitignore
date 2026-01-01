@@ -1,7 +1,11 @@
 # Node / tooling (if you extend it)
 node_modules/
 npm-debug.log*
-*.vsix
+
+# Python cache
+__pycache__/
+*.pyc
+*.egg-info/
 
 # OS junk
 .DS_Store
@@ -9,5 +13,5 @@ Thumbs.db
 Desktop.ini
 
 # Editor junk
-.vscode/*.log
-.vscode/.react/
+.vscode/
+!.vscode/tasks.json

@@ -1,0 +1,11 @@
+{
+  "token_budget": 2200,
+  "baseline_files": [
+    "docs/PROJECT_CONTEXT.md",
+    "docs/NOW.md"
+  ],
+  "session_notes_file": "docs/SESSION_NOTES.md",
+  "session_notes_tail_lines": 80,
+  "protocol_file": "docs/AGENT_SESSION_PROTOCOL.md",
+  "protocol_tail_lines": 120
+}
