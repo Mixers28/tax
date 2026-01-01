@@ -6,14 +6,14 @@ Version: 1.0
 Owner: You
 
 ## Purpose
-This repo combines a local memory kit with a Codex VS Code extension to enable a
+This repo combines a local memory kit with the handoffkit CLI to enable a
 persistent agent workflow. The goal is a predictable handoff loop where humans
 and agents share the same context, select the right agent for the task, and
 write back durable memory in Markdown.
 
 ## Core Ideas
 - Keep memory in plain Markdown tracked by Git.
-- Use a VS Code extension for fast, explicit agent selection and handoff.
+- Use the handoffkit CLI (or VS Code tasks) for explicit agent handoff.
 - Keep everything local, stable-API only, and Windows-friendly.
 
 ## System Components
@@ -26,23 +26,20 @@ write back durable memory in Markdown.
 - Start session: read LTM -> WM -> recent SM, then summarize context.
 - End session: append session notes and update LTM/WM summaries.
 
-### Codex Extension
-- Status bar shows the active agent and lets you change it.
-- Handoff view lists agents for quick selection.
-- Commands for direct handoff and for selecting the active agent.
-- Chat participants for Architect, Coder, Reviewer, and QA.
+### Handoffkit CLI
+- Generates role prompts with context packs.
+- Prints start/end session prompts and supports commit + push.
+- Uses repo role prompts in `.github/agents/*.agent.md` when present.
 
 ## Primary Workflows
-1) Select active agent in the status bar or handoff view.
-2) Use `Codex: Hand off task` or click a handoff target to open chat.
+1) Start a session with `handoffkit session start` (or VS Code task).
+2) Generate a role prompt with `handoffkit <role> "<instruction>"`.
 3) Provide instructions to the agent, using selection or file context when helpful.
-4) At session end, write back to memory docs and commit if needed.
+4) At session end, write back to memory docs and commit with `handoffkit session end --commit`.
 
 ## Constraints
-- VS Code stable APIs only (no proposed APIs).
-- Windows support is required (path handling, scripts, and tasks).
+- CLI must run on macOS/Linux/WSL.
 - No external services or network dependencies.
 
 ## Testing
-- Command wiring check (`extensions/codex/scripts/verify-command-wiring.js`).
-- Manual smoke tests in VS Code for handoff and status bar selection.
+- Manual smoke tests for CLI prompts and handoff flow.

@@ -5,16 +5,16 @@
 
 <!-- SUMMARY_START -->
 **Current Focus (auto-maintained by Agent):**
-- Update docs to reflect the merged persistent agent workflow (memory kit + Codex extension).
-- Validate the handoff UI, command wiring, and active agent selection on VS Code stable.
-- Ensure Windows support is solid across scripts, paths, and instructions.
+- Keep docs aligned to the handoffkit CLI workflow and SPEC.md authority.
+- Validate the session start/end flow with the new agent prompts.
+- Remove leftover extension artifacts and keep repo structure clean.
 <!-- SUMMARY_END -->
 
 ---
 
 ## Current Objective
 
-Deliver a coherent persistent agent workflow template with accurate docs and a stable Codex handoff extension.
+Deliver a coherent handoffkit CLI workflow template with accurate docs and SPEC.md as the source of truth.
 
 ---
 
@@ -27,15 +27,15 @@ Deliver a coherent persistent agent workflow template with accurate docs and a s
 ## What We Are Working On Right Now
 
 - [x] Replace MCP framing in docs with the persistent agent workflow source of truth.
-- [ ] Document the extension handoff UX (status bar, tree view, commands).
-- [ ] Verify command wiring and basic smoke tests on VS Code stable.
+- [x] Remove extension artifacts and legacy scripts.
+- [ ] Verify session flow with the new CLI and role prompts.
 
 ---
 
 ## Next Small Deliverables
 
 - A clear usage section for selecting and handing off to agents.
-- A quick validation note or checklist for Windows behavior.
+- A quick validation note or checklist for CLI behavior.
 
 ---
 
