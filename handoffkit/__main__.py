@@ -23,6 +23,26 @@ def strip_frontmatter(md: str) -> str:
             return parts[2].lstrip("\n")
     return md
 
+def max_run_of_char(text: str, ch: str) -> int:
+    max_run = 0
+    run = 0
+    for c in text:
+        if c == ch:
+            run += 1
+            if run > max_run:
+                max_run = run
+        else:
+            run = 0
+    return max_run
+
+def fenced_block(text: str, label: str) -> str:
+    content = text.strip()
+    if not content:
+        return ""
+    fence_len = max(3, max_run_of_char(content, "`") + 1)
+    fence = "`" * fence_len
+    return f"## {label}\n\n{fence}\n{content}\n{fence}"
+
 def find_project_root(start: Path) -> Path:
     """Walk upwards to find a likely project root (Local MCP layout)."""
     start = start.resolve()
@@ -62,7 +82,7 @@ def read_optional_input(path_str: Optional[str], *, project_root: Path, label: s
         return None
     if path_str == "-":
         data = sys.stdin.read()
-        return f"## {label}\n\n```\n{data.strip()}\n```" if data.strip() else None
+        return fenced_block(data, label) or None
     p = Path(path_str)
     if not p.is_absolute():
         p = (project_root / p).resolve()
@@ -71,7 +91,7 @@ def read_optional_input(path_str: Optional[str], *, project_root: Path, label: s
     content = read_text(p).strip()
     if not content:
         return None
-    return f"## {label}\n\n```\n{content}\n```"
+    return fenced_block(content, label)
 
 def load_config(project_root: Path, tool_root: Path, config_path: Optional[str]) -> Dict:
     """Load config.
@@ -203,7 +223,7 @@ def build_context_pack(project_root: Path, cfg: Dict, instruction: str, selectio
     # Materialize baseline file sections (which are stored as rel paths above)
     materialized: List[Tuple[str, str, int]] = []
     for title, content, prio in sections:
-        if title in ("NOW", "PROJECT_CONTEXT") and isinstance(content, str) and content.endswith(".md") and "/" in content:
+        if title in ("NOW", "PROJECT_CONTEXT") and isinstance(content, str) and content.endswith(".md"):
             # It's a rel path
             max_tok = 450 if title == "NOW" else 650
             rb = read_baseline_section(project_root, content, max_tokens=max_tok)
@@ -425,17 +445,28 @@ def print_session_end(project_root: Path, commit_enabled: bool) -> None:
 
 def commit_session(project_root: Path, remote: str) -> None:
     run_git(["add", "docs/PROJECT_CONTEXT.md", "docs/NOW.md", "docs/SESSION_NOTES.md"], cwd=project_root)
-    run_git(["add", "-A"], cwd=project_root)
 
     branch = run_git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=project_root, capture=True).strip()
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     commit_message = f"Session notes update - {timestamp}"
 
-    changes = run_git(["status", "--porcelain"], cwd=project_root, capture=True).strip()
-    if changes:
+    staged = run_git(["diff", "--cached", "--name-only"], cwd=project_root, capture=True).strip()
+    if staged:
         run_git(["commit", "-m", commit_message], cwd=project_root)
     else:
         print("No changes to commit.")
+
+    status = run_git(["status", "--porcelain"], cwd=project_root, capture=True).strip()
+    if status:
+        other_paths = []
+        for line in status.splitlines():
+            path = line[3:]
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1]
+            if not path.startswith("docs/"):
+                other_paths.append(path)
+        if other_paths:
+            print("Warning: non-doc changes remain unstaged.")
 
     run_git(["push", remote, branch], cwd=project_root)
     print(f"Pushed branch '{branch}' to {remote}.")

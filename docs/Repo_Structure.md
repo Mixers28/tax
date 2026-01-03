@@ -5,6 +5,14 @@ local-mcp-context-kit/
 │   ├── SESSION_NOTES.md
 │   ├── AGENT_SESSION_PROTOCOL.md
 │   ├── MCP_LOCAL_DESIGN.md
+│   ├── PERSISTENT_AGENT_WORKFLOW.md
+├── .github/
+│   ├── agents/
+│   │   ├── architect.agent.md
+│   │   ├── coder.agent.md
+│   │   ├── polish.agent.md
+│   │   ├── qa.agent.md
+│   │   ├── reviewer.agent.md
 ├── handoffkit/
 │   ├── __init__.py
 │   ├── __main__.py

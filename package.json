@@ -1,0 +1,50 @@
+{
+	"name": "context7-mcp",
+	"displayName": "Context7 MCP Server",
+	"description": "Real-time code and documentation access for AI assistants via Context7 MCP server",
+	"version": "1.0.1",
+	"publisher": "Upstash",
+	"private": true,
+	"icon": "context7logo.png",
+	"license": "MIT",
+	"repository": "https://github.com/upstash/context7-vscode-extension",
+	"engines": {
+		"vscode": "^1.101.0"
+	},
+	"categories": [
+		"AI",
+		"Chat"
+	  ],
+	  "keywords": [
+		"mcp",
+		"ai",
+		"coding"
+	  ],
+	"activationEvents": [
+	  ],
+	"main": "./out/extension.js",
+	"contributes": {
+		"mcpServerDefinitionProviders": [
+			{
+				"id": "context7",
+				"label": "Context7"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"download-api": "dts dev",
+		"postdownload-api": "dts main",
+		"postinstall": "npm run download-api"
+	},
+	"dependencies": {
+		"@upstash/context7-mcp": "1.0.14"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@vscode/dts": "^0.4.1",
+		"typescript": "^5.8.2"
+	}
+}

@@ -1,0 +1,17 @@
+<h1>Evidence</h1>
+
+<p>
+  <strong>Tax return:</strong>
+  <%= @evidence.tax_return_id %>
+</p>
+
+<p>
+  <strong>Filename:</strong>
+  <%= @evidence.filename %>
+</p>
+
+<% if @evidence.file.attached? %>
+  <p>
+    <%= link_to "Download file", rails_blob_path(@evidence.file, disposition: "attachment") %>
+  </p>
+<% end %>

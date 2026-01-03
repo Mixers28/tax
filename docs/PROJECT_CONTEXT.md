@@ -5,56 +5,58 @@
 
 <!-- SUMMARY_START -->
 **Summary (auto-maintained by Agent):**
-- Template repo proving Markdown + Git can store long-lived memory for AI coding agents.
-- Entire workflow stays local inside VS Code + the handoffkit CLI, no backend dependencies.
-- Immediate push: polish docs, add an example project, and validate on a real codebase.
+- Local-first web app for UK Self Assessment 2024-25 using HMRC paper forms as the canonical schema.
+- Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
+- Immediate focus: extract box definitions from HMRC forms and build a boxes-first registry + data capture.
 <!-- SUMMARY_END -->
 
 ---
 
 ## 1. Project Overview
 
-- **Name:** local-mcp-context-kit
-- **Owner:** TBD (template maintainer)
-- **Purpose:** Template repo demonstrating how Markdown plus Git can serve as durable memory for AI coding agents.
-- **Primary Stack:** Git + Markdown docs, VS Code editor, Python CLI helper (no backend).
-- **Target Platforms:** Local developer environments (VS Code on desktop).
+- **Name:** tax (UK Self Assessment helper)
+- **Owner:** TBD
+- **Purpose:** Local-first app that maps user inputs to HMRC SA100/SA102/SA106/SA110 boxes and exports a "copy to HMRC" worksheet.
+- **Primary Stack:** Rails 7 + Hotwire, SQLite, Docker Compose.
+- **Target Platforms:** Local developer environments (macOS/Linux/WSL).
 
 ---
 
 ## 2. Core Design Pillars
 
-- Keep project memory transparent and versioned via Markdown in Git.
-- Maintain an editor-native workflow (VS Code + handoffkit CLI) without external services.
-- Provide a reusable template that agents and humans can adopt quickly.
+- Forms-first mapping: every input maps to a specific HMRC box.
+- Deterministic calculations only (ANI/HICBC/FTCR), no "AI decides your tax".
+- Privacy-first and isolated: local-only, encrypted at rest, no outbound network by default.
+- Produce a clear "Copy to HMRC" worksheet for manual filing.
 
 ---
 
 ## 3. Technical Decisions & Constraints
 
-- Language(s): Markdown for docs; Python helper CLI as needed.
-- Framework(s): None; rely on native editor tooling.
-- Database / storage: Git repository history; no external database.
-- Hosting / deployment: Shared via Git hosting and cloned locally.
+- Language(s): Ruby (Rails), HTML/CSS/JS (Hotwire).
+- Framework(s): Rails 7 + Hotwire.
+- Database / storage: SQLite for MVP; encrypted local storage for sensitive data.
+- Hosting / deployment: Local Docker Compose from Sprint 1.
 - Non-negotiable constraints:
-  - Must remain backend-free and editor-native.
+  - No external calls by default; isolation required.
   - Documentation stays in plain Markdown for easy review.
 
 ---
 
 ## 4. Architecture Snapshot
 
-- Docs folder holds long-term (PROJECT_CONTEXT), working-memory (NOW), and session logs (SESSION_NOTES).
-- The handoffkit CLI guides agents through start/end rituals.
-- VS Code tasks integrate with the handoffkit CLI so humans/agents share the same workflow.
+- Box registry (Form/Page/Box definitions) drives UI and export.
+- Box values are stored per return, with evidence links and audit trail.
+- Calculators produce deterministic outputs for ANI/HICBC/FTCR.
+- Exporter generates "Copy to HMRC" worksheet (PDF + JSON).
 
 ---
 
 ## 5. Links & Related Docs
 
-- Roadmap: TBD
-- Design docs: docs/MCP_LOCAL_DESIGN.md, docs/AGENT_SESSION_PROTOCOL.md
-- Specs: docs/Repo_Structure.md
+- Roadmap: docs/NOW.md
+- Design docs: docs/spec.md, docs/AGENT_SESSION_PROTOCOL.md
+- References: docs/references/sa-forms-2025-redacted.pdf, docs/references/sa-forms-2025-boxes-first-pass.md
 - Product / UX docs: docs/PROJECT_CONTEXT.md, docs/NOW.md
 
 ---
@@ -63,5 +65,4 @@
 
 Use this section for **big decisions** only:
 
-- `YYYY-MM-DD` – Decided on X instead of Y.
-- `YYYY-MM-DD` – Switched primary deployment target to Z.
+- `2026-01-01` – Chose Rails + Hotwire and Docker Compose for MVP; no external calls by default.

@@ -1,0 +1,28 @@
+<h1>Upload evidence</h1>
+
+<%= form_with model: @evidence, local: true do |form| %>
+  <% if @evidence.errors.any? %>
+    <div>
+      <h2><%= pluralize(@evidence.errors.count, "error") %> prevented this upload:</h2>
+      <ul>
+        <% @evidence.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :tax_return_id, "Tax return ID" %>
+    <%= form.number_field :tax_return_id, required: true %>
+  </div>
+
+  <div>
+    <%= form.label :file, "File" %>
+    <%= form.file_field :file, required: true %>
+  </div>
+
+  <div>
+    <%= form.submit "Upload" %>
+  </div>
+<% end %>

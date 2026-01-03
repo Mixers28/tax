@@ -1,0 +1,1034 @@
+[
+  {
+    "form": "SA100",
+    "page": "TR1",
+    "box": "1",
+    "instance": 1,
+    "label": "Your date of birth- it helps get your tax right",
+    "type": "date"
+  },
+  {
+    "form": "SA100",
+    "page": "TR1",
+    "box": "2",
+    "instance": 1,
+    "label": "Your name and address- if it is different from what is",
+    "type": "date"
+  },
+  {
+    "form": "SA100",
+    "page": "TR1",
+    "box": "3",
+    "instance": 1,
+    "label": "Your phone number",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR1",
+    "box": "4",
+    "instance": 1,
+    "label": "Your National Insurance number- leave blank if the",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "1",
+    "instance": 1,
+    "label": "Employment",
+    "type": "choice+number"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "2",
+    "instance": 1,
+    "label": "Self-employment",
+    "type": "choice+number"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "3",
+    "instance": 1,
+    "label": "Partnership",
+    "type": "choice+number"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "4",
+    "instance": 1,
+    "label": "UK property",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "5",
+    "instance": 1,
+    "label": "Foreign",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "6",
+    "instance": 1,
+    "label": "Trusts etc",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "7",
+    "instance": 1,
+    "label": "Capital Gains Tax summary",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "8",
+    "instance": 1,
+    "label": "Residence, remittance basis etc",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR2",
+    "box": "9",
+    "instance": 1,
+    "label": "Additional information",
+    "type": "choice"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "1",
+    "instance": 1,
+    "label": "Taxed UK interest- the net amount after tax has been",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "2",
+    "instance": 1,
+    "label": "Untaxed UK interest- amounts which have not had tax",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "3",
+    "instance": 1,
+    "label": "Untaxed foreign interest (up to GBP 2,000)- amounts which",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "4",
+    "instance": 1,
+    "label": "Dividends from UK companies- the amount received",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "5",
+    "instance": 1,
+    "label": "Other dividends- the amount received - read the notes",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "6",
+    "instance": 1,
+    "label": "Foreign dividends (up to GBP 500)- the amount in sterling",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "7",
+    "instance": 1,
+    "label": "Tax taken off foreign dividends- the sterling equivalent",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "8",
+    "instance": 1,
+    "label": "State Pension- amount you were entitled to receive in the",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "9",
+    "instance": 1,
+    "label": "State Pension lump sum- the gross amount of any",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "10",
+    "instance": 1,
+    "label": "Tax taken off box 9",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "11",
+    "instance": 1,
+    "label": "Pensions (other than State Pension), retirement",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "12",
+    "instance": 1,
+    "label": "Tax taken off box 11",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "13",
+    "instance": 1,
+    "label": "Taxable Incapacity Benefit and contribution-based",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "14",
+    "instance": 1,
+    "label": "Tax taken off Incapacity Benefit in box 13",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "15",
+    "instance": 1,
+    "label": "Jobseeker's Allowance",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "16",
+    "instance": 1,
+    "label": "Total of any other taxable State Pensions and benefits",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "17",
+    "instance": 1,
+    "label": "Other taxable income- before expenses and tax",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "18",
+    "instance": 1,
+    "label": "Total amount of allowable expenses- read the notes",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "19",
+    "instance": 1,
+    "label": "Any tax taken off box 17",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "20",
+    "instance": 1,
+    "label": "Benefit from pre-owned assets- read the notes",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR3",
+    "box": "21",
+    "instance": 1,
+    "label": "Description of income in boxes 17 and 20- if there's",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "1",
+    "instance": 1,
+    "label": "Payments to registered pension schemes where basic",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "1.1",
+    "instance": 1,
+    "label": "Total of any 'one-off' payments in box 1",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "2",
+    "instance": 1,
+    "label": "Payments to a retirement annuity contract where basic",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "3",
+    "instance": 1,
+    "label": "Payments to your employer's scheme which were not",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "4",
+    "instance": 1,
+    "label": "Payments to an overseas pension scheme, which is not",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "5",
+    "instance": 1,
+    "label": "Gift Aid payments made in the year to 5 April 2025",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "6",
+    "instance": 1,
+    "label": "Total of any 'one-off' payments in box 5",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "7",
+    "instance": 1,
+    "label": "Gift Aid payments made in the year to 5 April 2025",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "8",
+    "instance": 1,
+    "label": "Gift Aid payments made after 5 April 2025 but to",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "9",
+    "instance": 1,
+    "label": "Value of qualifying shares or securities gifted to charity",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "10",
+    "instance": 1,
+    "label": "Value of qualifying land and buildings gifted to charity",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "13",
+    "instance": 1,
+    "label": "If you're registered blind, or severely sight impaired,",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "14",
+    "instance": 1,
+    "label": "Enter the name of the local authority or other register",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "15",
+    "instance": 1,
+    "label": "If you want your spouse's, or civil partner's, surplus",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR4",
+    "box": "16",
+    "instance": 1,
+    "label": "If you want your spouse, or civil partner, to have your",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "1",
+    "instance": 1,
+    "label": "If you've received notification from Student Loans",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "2",
+    "instance": 1,
+    "label": "If your employer has deducted Student Loan",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "3",
+    "instance": 1,
+    "label": "If your employer has deducted Postgraduate Loan",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "1",
+    "instance": 2,
+    "label": "Enter the total amount of Child Benefit you and your",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "2",
+    "instance": 2,
+    "label": "Enter the number of children you and your partner",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "3",
+    "instance": 2,
+    "label": "Enter the date that you and your partner",
+    "type": "date"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "1",
+    "instance": 3,
+    "label": "Your spouse or civil partner's first name",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "2",
+    "instance": 3,
+    "label": "Your spouse or civil partner's last name",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR5",
+    "box": "3",
+    "instance": 3,
+    "label": "Your spouse or civil partner's National Insurance number",
+    "type": "date"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "2",
+    "instance": 1,
+    "label": "If you owe less than GBP 3,000 for the 2024-25 tax year",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "3",
+    "instance": 1,
+    "label": "If you owe tax on savings, casual earnings and/or",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "1",
+    "instance": 1,
+    "label": "If you've had any 2024-25 Income Tax refunded or set off by us or Jobcentre Plus, enter the amount- read the notes",
+    "type": "money"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "4",
+    "instance": 1,
+    "label": "Name of bank or building society",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "5",
+    "instance": 1,
+    "label": "Name of account holder (or nominee)",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "6",
+    "instance": 1,
+    "label": "Branch sort code",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "7",
+    "instance": 1,
+    "label": "Account number",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "8",
+    "instance": 1,
+    "label": "Building society reference number",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "9",
+    "instance": 1,
+    "label": "If you or your nominee do not have a UK bank",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "10",
+    "instance": 1,
+    "label": "If you've entered a nominee's name in box 5,",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "12",
+    "instance": 1,
+    "label": "Nominee's address",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "13",
+    "instance": 1,
+    "label": "and postcode",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR6",
+    "box": "14",
+    "instance": 1,
+    "label": "To authorise your nominee to receive any repayment,",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR7",
+    "box": "15",
+    "instance": 1,
+    "label": "Your tax adviser's name",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR7",
+    "box": "16",
+    "instance": 1,
+    "label": "Their phone number",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR7",
+    "box": "17",
+    "instance": 1,
+    "label": "The first line of their address including the postcode",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR7",
+    "box": "18",
+    "instance": 1,
+    "label": "The reference your adviser uses for you",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR7",
+    "box": "19",
+    "instance": 1,
+    "label": "Please give any other information in this space",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "20",
+    "instance": 1,
+    "label": "If this tax return contains provisional figures,",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "21",
+    "instance": 1,
+    "label": "If you're enclosing separate supplementary pages,",
+    "type": "bool"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "22",
+    "instance": 1,
+    "label": "Declaration",
+    "type": "date"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "23",
+    "instance": 1,
+    "label": "If you've signed on behalf of someone else, enter",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "24",
+    "instance": 1,
+    "label": "Enter the name of the person you've signed for",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "25",
+    "instance": 1,
+    "label": "If you filled in boxes 23 and 24 enter your name",
+    "type": "text"
+  },
+  {
+    "form": "SA100",
+    "page": "TR8",
+    "box": "26",
+    "instance": 1,
+    "label": "and your address",
+    "type": "text"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "9",
+    "instance": 1,
+    "label": "Company cars and vans",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "10",
+    "instance": 1,
+    "label": "Fuel for company cars and vans",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "11",
+    "instance": 1,
+    "label": "Private medical and dental insurance",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "12",
+    "instance": 1,
+    "label": "Vouchers, credit cards and excess mileage allowance",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "13",
+    "instance": 1,
+    "label": "Goods and other assets provided by your employer",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "14",
+    "instance": 1,
+    "label": "Accommodation provided by your employer",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "15",
+    "instance": 1,
+    "label": "Other benefits (including interest-free and low",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "16",
+    "instance": 1,
+    "label": "Expenses payments received and balancing charges",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "17",
+    "instance": 1,
+    "label": "Business travel and subsistence expenses",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "18",
+    "instance": 1,
+    "label": "Fixed deductions for expenses",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "19",
+    "instance": 1,
+    "label": "Professional fees and subscriptions",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "20",
+    "instance": 1,
+    "label": "Other expenses and capital allowances",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "1",
+    "instance": 1,
+    "label": "Pay from this employment - the total from your",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "1.1",
+    "instance": 1,
+    "label": "Payrolled benefits included in box 1 which affect",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "2",
+    "instance": 1,
+    "label": "UK tax taken off pay in box 1",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "3",
+    "instance": 1,
+    "label": "Tips and other payments not on your P60",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "3.1",
+    "instance": 1,
+    "label": "Pension contribution- payment from HMRC",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "4",
+    "instance": 1,
+    "label": "PAYE tax reference of your employer (on your P45/P60)",
+    "type": "text"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "5",
+    "instance": 1,
+    "label": "Your employer's name",
+    "type": "bool"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "6.1",
+    "instance": 1,
+    "label": "If you ceased being a director before 6 April 2025, put the",
+    "type": "date"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "7",
+    "instance": 1,
+    "label": "And, if the company was a close company, put 'X'",
+    "type": "text"
+  },
+  {
+    "form": "SA102",
+    "page": "E1",
+    "box": "8",
+    "instance": 1,
+    "label": "If this employment income is from inside off-payroll",
+    "type": "bool"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "1",
+    "instance": 1,
+    "label": "Pay from this employment - the total from your",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "1.1",
+    "instance": 1,
+    "label": "Payrolled benefits included in box 1 which affect",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "2",
+    "instance": 1,
+    "label": "UK tax taken off pay in box 1",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "3",
+    "instance": 1,
+    "label": "Tips and other payments not on your P60",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "3.1",
+    "instance": 1,
+    "label": "Pension contribution- payment from HMRC",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "4",
+    "instance": 1,
+    "label": "PAYE tax reference of your employer (on your P45/P60)",
+    "type": "text"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "5",
+    "instance": 1,
+    "label": "Your employer's name",
+    "type": "bool"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "6.1",
+    "instance": 1,
+    "label": "If you ceased being a director before 6 April 2025, put the",
+    "type": "date"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "7",
+    "instance": 1,
+    "label": "And, if the company was a close company, put 'X'",
+    "type": "text"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "8",
+    "instance": 1,
+    "label": "If this employment income is from inside off-payroll",
+    "type": "bool"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "9",
+    "instance": 1,
+    "label": "Company cars and vans",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "10",
+    "instance": 1,
+    "label": "Fuel for company cars and vans",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "11",
+    "instance": 1,
+    "label": "Private medical and dental insurance",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "12",
+    "instance": 1,
+    "label": "Vouchers, credit cards and excess mileage allowance",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "13",
+    "instance": 1,
+    "label": "Goods and other assets provided by your employer",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "14",
+    "instance": 1,
+    "label": "Accommodation provided by your employer",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "15",
+    "instance": 1,
+    "label": "Other benefits (including interest-free and low",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "16",
+    "instance": 1,
+    "label": "Expenses payments received and balancing charges",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "17",
+    "instance": 1,
+    "label": "Business travel and subsistence expenses",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "18",
+    "instance": 1,
+    "label": "Fixed deductions for expenses",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "19",
+    "instance": 1,
+    "label": "Professional fees and subscriptions",
+    "type": "money"
+  },
+  {
+    "form": "SA102",
+    "page": "E2",
+    "box": "20",
+    "instance": 1,
+    "label": "Other expenses and capital allowances",
+    "type": "money"
+  },
+  {
+    "form": "SA106",
+    "page": "F1",
+    "box": "1",
+    "instance": 1,
+    "label": "If you were unable to transfer any of your overseas",
+    "type": "bool"
+  },
+  {
+    "form": "SA106",
+    "page": "F1",
+    "box": "2",
+    "instance": 1,
+    "label": "If you're calculating your tax, enter the total",
+    "type": "text"
+  }
+]

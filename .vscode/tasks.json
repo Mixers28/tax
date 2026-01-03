@@ -4,64 +4,89 @@
     {
       "label": "Start Session (Agent - Coder)",
       "type": "shell",
-      "command": "handoffkit",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
+        "-m",
+        "handoffkit",
         "session",
         "start",
         "--agent-role",
         "Coder",
         "--open-docs"
       ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     },
     {
       "label": "Start Session (Agent - Architect)",
       "type": "shell",
-      "command": "handoffkit",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
+        "-m",
+        "handoffkit",
         "session",
         "start",
         "--agent-role",
         "Architect",
         "--open-docs"
       ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     },
     {
       "label": "Start Session (Agent - Reviewer)",
       "type": "shell",
-      "command": "handoffkit",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
+        "-m",
+        "handoffkit",
         "session",
         "start",
         "--agent-role",
         "Reviewer",
         "--open-docs"
       ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     },
     {
       "label": "Start Session (Agent - QA)",
       "type": "shell",
-      "command": "handoffkit",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
+        "-m",
+        "handoffkit",
         "session",
         "start",
         "--agent-role",
         "QA",
         "--open-docs"
       ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     },
     {
       "label": "End Session (Agent + Commit)",
       "type": "shell",
-      "command": "handoffkit",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": [
+        "-m",
+        "handoffkit",
         "session",
         "end",
         "--commit"
       ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
     }
   ]
