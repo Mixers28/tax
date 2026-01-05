@@ -63,16 +63,17 @@ class JSONExportService
 
   def serialize_calculations
     (@export.calculation_results || {}).map do |calc_type, result|
-      next nil unless result[:success]
+      # Handle both symbol and string keys (JSON storage converts symbols to strings)
+      success = result[:success] || result["success"]
+      next nil unless success
 
       {
-        calculation_type: result[:calculation_type],
-        formula: result[:formula],
-        input_values: result[:input_values],
-        calculation_steps: result[:calculation_steps],
-        output_value: result[:output_value],
-        confidence: result[:confidence],
-        additional_info: result.except(:success, :calculation_type, :formula, :input_values, :calculation_steps, :output_value, :confidence)
+        calculation_type: result[:calculation_type] || result["calculation_type"],
+        formula: result[:formula] || result["formula"],
+        input_values: result[:input_values] || result["input_values"],
+        calculation_steps: result[:calculation_steps] || result["calculation_steps"],
+        output_value: result[:output_value] || result["output_value"],
+        confidence: result[:confidence] || result["confidence"]
       }
     end.compact
   end
