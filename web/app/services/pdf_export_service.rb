@@ -36,63 +36,70 @@ class PDFExportService
   private
 
   def add_title_page
-    @pdf.text "UK Self Assessment Tax Return Export", size: 24, weight: :bold
+    pdf_text "UK Self Assessment Tax Return Export", size: 24, weight: :bold
     @pdf.move_down 10
-    @pdf.text "Tax Year: #{@tax_return.tax_year.label}", size: 14
-    @pdf.text "Export Date: #{@export.exported_at.strftime('%d %B %Y at %H:%M:%S')}", size: 12
+    pdf_text "Tax Year: #{@tax_return.tax_year.label}", size: 14
+    pdf_text "Export Date: #{@export.exported_at.strftime('%d %B %Y at %H:%M:%S')}", size: 12
     @pdf.move_down 20
 
     if @export.file_hash.present?
-      @pdf.text "Export Hash: #{@export.file_hash}", size: 10, font: "Courier"
+      pdf_text "Export Hash: #{@export.file_hash}", size: 10, font: "Courier"
     end
     @pdf.move_down 20
-    @pdf.text "This export contains all tax box values, validation results, and calculated relief amounts.", style: :italic, size: 10
+    pdf_text "This export contains all tax box values, validation results, and calculated relief amounts.", style: :italic, size: 10
+  end
+
+  # Wrapper to sanitize all text before adding to PDF
+  def pdf_text(text, **options)
+    @pdf.text(sanitize_text(text.to_s), **options)
+  rescue => e
+    Rails.logger.warn("Failed to add text to PDF: #{e.message}")
   end
 
   def add_box_values_section
     @pdf.move_down 20
-    @pdf.text "Section 1: Box Values", size: 16, weight: :bold
+    pdf_text "Section 1: Box Values", size: 16, weight: :bold
     @pdf.move_down 10
 
     box_values = @tax_return.box_values.includes(:box_definition).to_a
 
     if box_values.any?
       box_values.each do |bv|
-        value_display = bv.value_gbp.present? ? "£#{bv.value_gbp}" : sanitize_text(bv.value_raw.to_s)
+        value_display = bv.value_gbp.present? ? "£#{bv.value_gbp}" : bv.value_raw.to_s
         status = bv.value_raw.present? ? "Filled" : "Empty"
 
-        @pdf.text "Box #{bv.box_definition.box_code}: #{value_display} [#{status}]", size: 11
+        pdf_text "Box #{bv.box_definition.box_code}: #{value_display} [#{status}]", size: 11
       end
     else
-      @pdf.text "No box values entered", style: :italic, color: "999999"
+      pdf_text "No box values entered", style: :italic, color: "999999"
     end
   end
 
   def add_validation_section
     @pdf.move_down 20
-    @pdf.text "Section 2: Validation Results", size: 16, weight: :bold
+    pdf_text "Section 2: Validation Results", size: 16, weight: :bold
     @pdf.move_down 10
 
     if @export.validation_state.present?
       summary = @export.validation_summary
-      @pdf.text "Total Rules Checked: #{summary[:total]}", size: 11
-      @pdf.text "Valid: #{summary[:valid]} ✓", size: 11, color: "00AA00"
-      @pdf.text "Errors: #{summary[:errors]}", size: 11, color: summary[:errors].to_i > 0 ? "AA0000" : "000000"
-      @pdf.text "Warnings: #{summary[:warnings]}", size: 11, color: summary[:warnings].to_i > 0 ? "FF6600" : "000000"
+      pdf_text "Total Rules Checked: #{summary[:total]}", size: 11
+      pdf_text "Valid: #{summary[:valid]}", size: 11, color: "00AA00"
+      pdf_text "Errors: #{summary[:errors]}", size: 11, color: summary[:errors].to_i > 0 ? "AA0000" : "000000"
+      pdf_text "Warnings: #{summary[:warnings]}", size: 11, color: summary[:warnings].to_i > 0 ? "FF6600" : "000000"
     else
-      @pdf.text "No validation data available", style: :italic, color: "999999"
+      pdf_text "No validation data available", style: :italic, color: "999999"
     end
   end
 
   def add_calculations_section
     @pdf.move_down 20
-    @pdf.text "Section 3: Tax Calculations", size: 16, weight: :bold
+    pdf_text "Section 3: Tax Calculations", size: 16, weight: :bold
     @pdf.move_down 10
 
     calculations = @export.calculation_results || {}
 
     if calculations.empty?
-      @pdf.text "No calculations available", style: :italic, color: "999999"
+      pdf_text "No calculations available", style: :italic, color: "999999"
       return
     end
 
@@ -102,7 +109,7 @@ class PDFExportService
       next unless success
 
       calc_name = (result[:calculation_type] || result["calculation_type"])&.upcase || calc_type&.upcase || "Unknown"
-      @pdf.text "#{calc_name}", weight: :bold, size: 12, color: "0066CC"
+      pdf_text "#{calc_name}", weight: :bold, size: 12, color: "0066CC"
       @pdf.move_down 5
 
       steps = result[:calculation_steps] || result["calculation_steps"]
@@ -110,36 +117,34 @@ class PDFExportService
         steps.each do |step|
           label = step[:label] || step["label"]
           value = step[:value] || step["value"]
-          @pdf.text "  • #{label}: £#{value.to_f.round(2)}", size: 10
+          pdf_text "  - #{label}: £#{value.to_f.round(2)}", size: 10
         end
       end
 
       output = result[:output_value] || result["output_value"]
-      @pdf.text "  Result: £#{output.to_f.round(2)}", weight: :bold, size: 11, color: "00AA00"
+      pdf_text "  Result: £#{output.to_f.round(2)}", weight: :bold, size: 11, color: "00AA00"
       @pdf.move_down 10
     end
   end
 
   def add_evidence_section
     @pdf.move_down 20
-    @pdf.text "Section 4: Evidence Files", size: 16, weight: :bold
+    pdf_text "Section 4: Evidence Files", size: 16, weight: :bold
     @pdf.move_down 10
 
     evidences = @tax_return.evidences.to_a
 
     if evidences.any?
-      @pdf.text "Total Evidence Files: #{evidences.count}", size: 11
+      pdf_text "Total Evidence Files: #{evidences.count}", size: 11
       @pdf.move_down 5
 
       evidences.each do |evidence|
         evidence_type = evidence.evidence_type == "blank_form" ? "Form" : "Doc"
         upload_date = evidence.created_at.strftime("%d %b %Y")
-        # Sanitize filename to remove non-ASCII characters for PDF compatibility
-        safe_filename = sanitize_text(evidence.filename)
-        @pdf.text "  • [#{evidence_type}] #{safe_filename} (#{upload_date})", size: 10
+        pdf_text "  - [#{evidence_type}] #{evidence.filename} (#{upload_date})", size: 10
       end
     else
-      @pdf.text "No evidence files", style: :italic, color: "999999"
+      pdf_text "No evidence files", style: :italic, color: "999999"
     end
   end
 

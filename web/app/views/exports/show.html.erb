@@ -53,10 +53,10 @@
           <h2>Download Files</h2>
           <div class="download-buttons">
             <% if @export.file_path.present? %>
-              <%= link_to "📥 Download PDF", tax_return_export_download_pdf_path(@tax_return, @export), class: "download-btn pdf" %>
+              <%= link_to "📥 Download PDF", download_pdf_tax_return_export_path(@tax_return, @export), class: "download-btn pdf" %>
             <% end %>
             <% if @export.json_path.present? %>
-              <%= link_to "📥 Download JSON", tax_return_export_download_json_path(@tax_return, @export), class: "download-btn json" %>
+              <%= link_to "📥 Download JSON", download_json_tax_return_export_path(@tax_return, @export), class: "download-btn json" %>
             <% end %>
           </div>
         </div>
