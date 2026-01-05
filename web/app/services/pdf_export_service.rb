@@ -4,22 +4,22 @@ class PDFExportService
   def initialize(tax_return, export)
     @tax_return = tax_return
     @export = export
-    # Use DejaVuSans font which supports UTF-8 characters including German umlauts
-    @pdf = Prawn::Document.new(
-      margin: 40,
-      skip_page_creation: false
-    )
-    # Register DejaVu fonts for full UTF-8 support
-    font_path = "#{Prawn::BASEDIR}/data/fonts"
-    @pdf.font_families.update(
-      "DejaVu" => {
-        normal: "#{font_path}/DejaVuSans.ttf",
-        bold: "#{font_path}/DejaVuSans-Bold.ttf",
-        italic: "#{font_path}/DejaVuSans-Oblique.ttf",
-        bold_italic: "#{font_path}/DejaVuSans-BoldOblique.ttf"
-      }
-    )
-    @pdf.font("DejaVu")
+    @pdf = Prawn::Document.new(margin: 40)
+  end
+
+  # Convert non-ASCII characters to ASCII equivalents (e.g. ü -> u, ä -> a)
+  def sanitize_text(text)
+    return text unless text.is_a?(String)
+
+    # Replace common German/international characters with ASCII equivalents
+    text.gsub(/ü/, 'u')
+        .gsub(/ö/, 'o')
+        .gsub(/ä/, 'a')
+        .gsub(/Ü/, 'U')
+        .gsub(/Ö/, 'O')
+        .gsub(/Ä/, 'A')
+        .gsub(/ß/, 'ss')
+        .gsub(/[^\x00-\x7F]/, '?') # Replace other non-ASCII with ?
   end
 
   def generate
@@ -58,8 +58,8 @@ class PDFExportService
 
     if box_values.any?
       box_values.each do |bv|
-        value_display = bv.value_gbp.present? ? "£#{bv.value_gbp}" : bv.value_raw.to_s
-        status = bv.value_raw.present? ? "✓ Filled" : "✗ Empty"
+        value_display = bv.value_gbp.present? ? "£#{bv.value_gbp}" : sanitize_text(bv.value_raw.to_s)
+        status = bv.value_raw.present? ? "Filled" : "Empty"
 
         @pdf.text "Box #{bv.box_definition.box_code}: #{value_display} [#{status}]", size: 11
       end
@@ -132,9 +132,11 @@ class PDFExportService
       @pdf.move_down 5
 
       evidences.each do |evidence|
-        evidence_type = evidence.evidence_type == "blank_form" ? "📄 Form" : "📎 Doc"
+        evidence_type = evidence.evidence_type == "blank_form" ? "Form" : "Doc"
         upload_date = evidence.created_at.strftime("%d %b %Y")
-        @pdf.text "  • [#{evidence_type}] #{evidence.filename} (#{upload_date})", size: 10
+        # Sanitize filename to remove non-ASCII characters for PDF compatibility
+        safe_filename = sanitize_text(evidence.filename)
+        @pdf.text "  • [#{evidence_type}] #{safe_filename} (#{upload_date})", size: 10
       end
     else
       @pdf.text "No evidence files", style: :italic, color: "999999"
