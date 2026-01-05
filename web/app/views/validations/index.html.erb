@@ -1,0 +1,383 @@
+<div class="container">
+  <div class="validations-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <h1>Validations</h1>
+      <p class="subtitle">Verify your tax return data for <%= @tax_return.tax_year.label %></p>
+    </div>
+
+    <div class="content">
+      <div class="actions">
+        <%= button_to "Run Validations", "/tax_returns/#{@tax_return.id}/validations/run_validation", method: :post, class: "btn btn-primary btn-lg" %>
+      </div>
+
+      <% if @validation_results.present? %>
+        <div class="validation-results">
+          <div class="summary">
+            <h2>Validation Summary</h2>
+            <div class="summary-stats">
+              <div class="stat">
+                <span class="stat-value"><%= @validation_results[:total] %></span>
+                <span class="stat-label">Total Rules</span>
+              </div>
+              <div class="stat passed">
+                <span class="stat-value"><%= @validation_results[:passed] %></span>
+                <span class="stat-label">Passed</span>
+              </div>
+              <div class="stat failed">
+                <span class="stat-value"><%= @validation_results[:failed] %></span>
+                <span class="stat-label">Failed</span>
+              </div>
+              <div class="stat warnings">
+                <span class="stat-value"><%= @validation_results[:warnings].length %></span>
+                <span class="stat-label">Warnings</span>
+              </div>
+            </div>
+          </div>
+
+          <% if @validation_results[:errors].present? %>
+            <div class="validation-section errors">
+              <h3>Errors (Must Fix)</h3>
+              <div class="validation-list">
+                <% @validation_results[:errors].each do |error| %>
+                  <div class="validation-item error">
+                    <div class="item-header">
+                      <span class="badge error">ERROR</span>
+                      <strong><%= error[:rule_code] %></strong>
+                    </div>
+                    <p class="item-message"><%= error[:message] %></p>
+                    <% if error[:affected_boxes].present? %>
+                      <p class="item-boxes">Affected boxes: <code><%= error[:affected_boxes].join(", ") %></code></p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @validation_results[:warnings].present? %>
+            <div class="validation-section warnings">
+              <h3>Warnings (Review)</h3>
+              <div class="validation-list">
+                <% @validation_results[:warnings].each do |warning| %>
+                  <div class="validation-item warning">
+                    <div class="item-header">
+                      <span class="badge warning">WARNING</span>
+                      <strong><%= warning[:rule_code] %></strong>
+                    </div>
+                    <p class="item-message"><%= warning[:message] %></p>
+                    <% if warning[:affected_boxes].present? %>
+                      <p class="item-boxes">Affected boxes: <code><%= warning[:affected_boxes].join(", ") %></code></p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @validation_results[:info].present? %>
+            <div class="validation-section info">
+              <h3>Information</h3>
+              <div class="validation-list">
+                <% @validation_results[:info].each do |info| %>
+                  <div class="validation-item info">
+                    <div class="item-header">
+                      <span class="badge info">INFO</span>
+                      <strong><%= info[:rule_code] %></strong>
+                    </div>
+                    <p class="item-message"><%= info[:message] %></p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @validation_results[:passed].present? && @validation_results[:passed] > 0 %>
+            <div class="validation-section passed">
+              <h3>✓ Passed Checks</h3>
+              <p><%= @validation_results[:passed] %> validation rules passed successfully.</p>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <p>No validations run yet. Click "Run Validations" to check your tax return data.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .validations-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .actions {
+    margin-bottom: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .validation-results {
+    margin-top: 2rem;
+  }
+
+  .summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .summary h2 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .stat.passed .stat-value {
+    color: #28a745;
+  }
+
+  .stat.failed .stat-value {
+    color: #dc3545;
+  }
+
+  .stat.warnings .stat-value {
+    color: #ffc107;
+  }
+
+  .validation-section {
+    margin-bottom: 2rem;
+  }
+
+  .validation-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .validation-section.errors h3 {
+    color: #dc3545;
+  }
+
+  .validation-section.warnings h3 {
+    color: #ffc107;
+  }
+
+  .validation-section.info h3 {
+    color: #667eea;
+  }
+
+  .validation-section.passed h3 {
+    color: #28a745;
+  }
+
+  .validation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .validation-item {
+    border-left: 4px solid #dee2e6;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .validation-item.error {
+    border-left-color: #dc3545;
+    background-color: #fff5f5;
+  }
+
+  .validation-item.warning {
+    border-left-color: #ffc107;
+    background-color: #fffbf0;
+  }
+
+  .validation-item.info {
+    border-left-color: #667eea;
+    background-color: #f0f4ff;
+  }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .badge.error {
+    background-color: #dc3545;
+  }
+
+  .badge.warning {
+    background-color: #ffc107;
+    color: #333;
+  }
+
+  .badge.info {
+    background-color: #667eea;
+  }
+
+  .item-header strong {
+    font-size: 0.95rem;
+    color: #333;
+  }
+
+  .item-message {
+    color: #666;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .item-boxes {
+    font-size: 0.9rem;
+    color: #999;
+  }
+
+  code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 2px;
+    font-family: monospace;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #999;
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .summary-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .item-header {
+      flex-wrap: wrap;
+    }
+  }
+</style>
