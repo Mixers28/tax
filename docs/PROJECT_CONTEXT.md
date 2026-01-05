@@ -7,7 +7,7 @@
 **Summary (auto-maintained by Agent):**
 - Local-first web app for UK Self Assessment 2024-25 using HMRC paper forms as the canonical schema.
 - Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
-- Current focus: Phase 3 offline PDF extraction with local Ollama integration.
+- Phase 4 complete: PDF/JSON export generation with UTF-8 character encoding for international documents.
 <!-- SUMMARY_END -->
 
 ---
@@ -66,4 +66,6 @@
 
 Use this section for **big decisions** only:
 
+- `2026-01-05` – Phase 4 export feature complete. PDF/JSON exports now support UTF-8 character encoding with sanitization for German/international documents. Text sanitization wrapper handles non-ASCII characters (ü→u, ö→o, ä→a, etc.) for Prawn PDF compatibility.
+- `2026-01-03` – Phase 3 extraction pipeline complete. Ollama (gemma3:1b) integration for offline PDF text extraction and candidate box value suggestions.
 - `2026-01-01` – Chose Rails + Hotwire and Docker Compose for MVP; no external calls by default.

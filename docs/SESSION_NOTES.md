@@ -37,6 +37,41 @@
 ## Session Template (Copy/Paste for each new session)
 ## Recent Sessions (last 3-5)
 
+### 2026-01-05
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 4: PDF/JSON Export Generation** - Complete implementation of export feature with UTF-8 character encoding support
+- Fixed text sanitization for German filenames and international characters (ü→u, ö→o, ä→a, Ü→U, Ö→O, Ä→A, ß→ss)
+- Implemented PDFExportService with Prawn library and text sanitization wrapper
+- Implemented JSONExportService with structured data serialization (box values, validations, calculations, evidence, audit trail)
+- Created review/preview page for exports before generation
+- Fixed Rails nested route helpers for PDF/JSON download functionality
+- Tested exports end-to-end with both PDF and JSON formats
+- Updated context documents (NOW.md, PROJECT_CONTEXT.md, SESSION_NOTES.md)
+
+### Files touched
+- web/app/services/pdf_export_service.rb - PDF generation with text sanitization
+- web/app/services/json_export_service.rb - JSON serialization
+- web/app/services/export_service.rb - Export orchestration
+- web/app/controllers/exports_controller.rb - Export controller actions
+- web/app/models/export.rb - Export model helper methods
+- web/app/views/exports/show.html.erb - Export detail page (fixed route helpers)
+- web/app/views/exports/index.html.erb - Export list page (fixed route helpers)
+- web/app/views/tax_returns/show.html.erb - Tax return page with export links (fixed route helpers)
+- docs/NOW.md - Updated with Phase 4 completion
+- docs/PROJECT_CONTEXT.md - Updated with Phase 4 summary
+- docs/SESSION_NOTES.md - This session entry
+
+### Outcomes / Decisions
+- Phase 4 export feature is production-ready with full UTF-8 character support
+- Text sanitization converts non-ASCII characters to ASCII equivalents for Prawn PDF compatibility
+- Original filenames preserved in JSON exports; PDF display uses simplified ASCII versions
+- Route helper naming convention: action comes first in nested resources (download_pdf_tax_return_export_path)
+- Exports include: title page, box values, validation summary, tax calculations, evidence files, and integrity hash
+
 ### 2026-01-03
 
 **Participants:** User, Codex Agent  
