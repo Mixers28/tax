@@ -139,6 +139,7 @@
                     <div class="evidence-filename"><%= evidence.filename %></div>
                     <div class="evidence-date"><%= evidence.created_at.strftime("%d %b %Y") %></div>
                     <div class="evidence-actions">
+                      <%= button_to "Extract", evidence_extraction_runs_path(evidence), method: :post, class: "btn btn-sm btn-extract" %>
                       <%= link_to "View", evidence_path(evidence), class: "link-btn" %>
                     </div>
                   </div>
@@ -156,6 +157,7 @@
                     <div class="evidence-filename"><%= evidence.filename %></div>
                     <div class="evidence-date"><%= evidence.created_at.strftime("%d %b %Y") %></div>
                     <div class="evidence-actions">
+                      <%= button_to "Extract", evidence_extraction_runs_path(evidence), method: :post, class: "btn btn-sm btn-extract" %>
                       <%= link_to "View", evidence_path(evidence), class: "link-btn" %>
                     </div>
                   </div>
@@ -163,10 +165,6 @@
               </div>
             </div>
           <% end %>
-
-          <div class="next-actions">
-            <%= button_to "Run Extraction", "/tax_returns/#{@tax_return.id}/extractions/run", method: :post, class: "btn btn-success" %>
-          </div>
         <% end %>
       </div>
     </div>
@@ -557,6 +555,27 @@
 
   .link-btn:hover {
     color: #764ba2;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .btn-extract {
+    background: linear-gradient(135deg, #00d084 0%, #00a86b 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+
+  .btn-extract:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 208, 132, 0.3);
   }
 
   .next-actions {
