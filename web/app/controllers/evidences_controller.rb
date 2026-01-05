@@ -3,7 +3,8 @@ class EvidencesController < ApplicationController
   before_action :validate_tax_return, only: [:new, :create]
 
   def new
-    @evidence = Evidence.new(tax_return_id: params[:tax_return_id])
+    @tax_return = current_user.tax_returns.find(params[:tax_return_id])
+    @evidence = Evidence.new(tax_return_id: @tax_return.id)
     @tax_returns = current_user.tax_returns.includes(:tax_year).order(created_at: :desc)
   end
 
