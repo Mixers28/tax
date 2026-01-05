@@ -1,7 +1,7 @@
 class IncomeSource < ApplicationRecord
   belongs_to :tax_return
 
-  enum source_type: {
+  enum :source_type, {
     employment: 0,
     self_employment: 1,
     dividends: 2,
