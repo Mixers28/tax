@@ -9,7 +9,7 @@
 - Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
 - Phase 4 complete: PDF/JSON export generation with UTF-8 character encoding.
 - Phase 5 spec complete: Full tax calculation engine design (5 sub-phases).
-- Phase 5a complete: Basic employment income tax calculator (MVP: income aggregation, PA, tax bands, Class 1 NI).
+- Phase 5a complete: Basic employment income tax calculator fully operational (database + models + services tested).
 <!-- SUMMARY_END -->
 
 ---
@@ -72,7 +72,7 @@
 
 Use this section for **big decisions** only:
 
-- `2026-01-05` – Phase 5a implementation complete: Employment income tax calculator with IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, NationalInsuranceCalculator services. Models: TaxBand (2024-25 thresholds), IncomeSource (multi-source income tracking), TaxLiability (calculation results), TaxCalculationBreakdown (audit trail). Database migrations created. Comprehensive test specs document expected behavior. PHASE_5A_README.md with architecture and usage. MVP ready for integration with export feature.
+- `2026-01-05` – Phase 5a implementation complete with database operational: Fixed SQLite jsonb→json compatibility, removed redundant migration indexes, corrected Rails 8.1 enum syntax. All 4 Phase 5a migrations running successfully. TaxBand (2024-25 thresholds), IncomeSource (multi-source income), TaxLiability (calculation results), TaxCalculationBreakdown (audit trail) all models tested and operational. 5 calculator services (IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, NationalInsuranceCalculator, TaxLiabilityOrchestrator) ready for integration. Comprehensive test specs document expected behavior. MVP ready for Phase 5a → export feature integration.
 - `2026-01-05` – Phase 5 specification created: Full UK tax calculation engine with 5 sub-phases (5a: basic income/tax/NI → 5e: advanced reliefs). Phase 5a targets employment income aggregation, Personal Allowance, tax bands (20%/40%/45%), and Class 1 NI. Modular service architecture with TaxLiability/IncomeSource/TaxCalculationBreakdown models for transparency and auditability.
 - `2026-01-05` – Phase 4 export feature complete. PDF/JSON exports now support UTF-8 character encoding with sanitization for German/international documents. Text sanitization wrapper handles non-ASCII characters (ü→u, ö→o, ä→a, etc.) for Prawn PDF compatibility.
 - `2026-01-03` – Phase 3 extraction pipeline complete. Ollama (gemma3:1b) integration for offline PDF text extraction and candidate box value suggestions.
