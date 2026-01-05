@@ -11,7 +11,6 @@ class CreateTaxCalculationBreakdowns < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :tax_calculation_breakdowns, :tax_return_id
     add_index :tax_calculation_breakdowns, [:tax_return_id, :step_key]
   end
 end

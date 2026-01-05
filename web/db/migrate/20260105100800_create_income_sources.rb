@@ -12,7 +12,6 @@ class CreateIncomeSources < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :income_sources, :tax_return_id
     add_index :income_sources, :source_type
   end
 end
