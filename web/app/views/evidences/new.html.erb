@@ -1,28 +1,585 @@
-<h1>Upload evidence</h1>
-
-<%= form_with model: @evidence, local: true do |form| %>
-  <% if @evidence.errors.any? %>
-    <div>
-      <h2><%= pluralize(@evidence.errors.count, "error") %> prevented this upload:</h2>
-      <ul>
-        <% @evidence.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+<div class="container">
+  <div class="upload-evidence-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <h1>Upload Evidence</h1>
+      <p class="subtitle">Organize your tax documents for <%= @tax_return.tax_year.label %></p>
     </div>
-  <% end %>
 
-  <div>
-    <%= form.label :tax_return_id, "Tax return ID" %>
-    <%= form.number_field :tax_return_id, required: true %>
-  </div>
+    <div class="content">
+      <% if @evidence.errors.any? %>
+        <div class="error-banner">
+          <h2><%= pluralize(@evidence.errors.count, "error") %> prevented this upload:</h2>
+          <ul>
+            <% @evidence.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
-  <div>
-    <%= form.label :file, "File" %>
-    <%= form.file_field :file, required: true %>
-  </div>
+      <div class="workflow-container">
+        <div class="workflow-step active">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h2>Blank Tax Forms</h2>
+            <p class="step-description">Upload the blank tax forms that need to be filled in</p>
+            <div class="form-group">
+              <%= form_with model: @evidence, local: true, class: "evidence-form" do |form| %>
+                <%= form.hidden_field :tax_return_id, value: @tax_return.id %>
+                <%= form.hidden_field :evidence_type, value: "blank_form" %>
 
-  <div>
-    <%= form.submit "Upload" %>
+                <div class="upload-box">
+                  <div class="upload-icon">📄</div>
+                  <label for="blank_forms_file">Choose files or drag and drop</label>
+                  <%= form.file_field :file, id: "blank_forms_file", multiple: true, accept: ".pdf", required: true, class: "file-input" %>
+                  <p class="file-help">Accepted formats: PDF</p>
+                </div>
+
+                <div class="examples">
+                  <p><strong>Examples of blank forms to upload:</strong></p>
+                  <ul>
+                    <li>SA100 (Self Assessment Return)</li>
+                    <li>SA102 (Self Employment)</li>
+                    <li>SA103 (UK Property)</li>
+                    <li>SA104 (Foreign Income)</li>
+                    <li>SA105 (UK Interest)</li>
+                  </ul>
+                </div>
+
+                <div class="form-actions">
+                  <%= form.submit "Upload Blank Forms", class: "btn btn-primary" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="workflow-step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h2>Supporting Documents</h2>
+            <p class="step-description">Upload evidence documents that support your tax return</p>
+            <div class="form-group">
+              <%= form_with model: @evidence, local: true, class: "evidence-form" do |form| %>
+                <%= form.hidden_field :tax_return_id, value: @tax_return.id %>
+                <%= form.hidden_field :evidence_type, value: "supporting_document" %>
+
+                <div class="upload-box">
+                  <div class="upload-icon">📎</div>
+                  <label for="supporting_docs_file">Choose files or drag and drop</label>
+                  <%= form.file_field :file, id: "supporting_docs_file", multiple: true, accept: ".pdf", required: true, class: "file-input" %>
+                  <p class="file-help">Accepted formats: PDF</p>
+                </div>
+
+                <div class="examples">
+                  <p><strong>Examples of supporting documents:</strong></p>
+                  <ul>
+                    <li>Payslips (P60, P45)</li>
+                    <li>Investment statements</li>
+                    <li>Bank interest statements</li>
+                    <li>Charitable donation receipts</li>
+                    <li>Rental income records</li>
+                    <li>Pension statements</li>
+                    <li>Dividend documentation</li>
+                  </ul>
+                </div>
+
+                <div class="form-actions">
+                  <%= form.submit "Upload Supporting Documents", class: "btn btn-secondary" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3>How This Works</h3>
+        <div class="info-steps">
+          <div class="info-step">
+            <span class="info-number">1</span>
+            <div class="info-text">
+              <strong>Organize Your Documents</strong>
+              <p>Upload your blank tax forms first, then your supporting evidence documents</p>
+            </div>
+          </div>
+          <div class="info-step">
+            <span class="info-number">2</span>
+            <div class="info-text">
+              <strong>AI Extraction</strong>
+              <p>Our AI will read through all your documents and extract relevant information</p>
+            </div>
+          </div>
+          <div class="info-step">
+            <span class="info-number">3</span>
+            <div class="info-text">
+              <strong>Review & Confirm</strong>
+              <p>You'll review the extracted data before it's stored in your tax return</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="uploaded-evidence">
+        <% blank_forms = @tax_return.evidences.where(evidence_type: "blank_form") %>
+        <% supporting_docs = @tax_return.evidences.where(evidence_type: "supporting_document") %>
+
+        <% if blank_forms.any? || supporting_docs.any? %>
+          <h3>Uploaded Evidence</h3>
+
+          <% if blank_forms.any? %>
+            <div class="evidence-section">
+              <h4>📄 Blank Forms (<%= blank_forms.count %>)</h4>
+              <div class="evidence-list">
+                <% blank_forms.each do |evidence| %>
+                  <div class="evidence-item">
+                    <div class="evidence-filename"><%= evidence.filename %></div>
+                    <div class="evidence-date"><%= evidence.created_at.strftime("%d %b %Y") %></div>
+                    <div class="evidence-actions">
+                      <%= link_to "View", evidence_path(evidence), class: "link-btn" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if supporting_docs.any? %>
+            <div class="evidence-section">
+              <h4>📎 Supporting Documents (<%= supporting_docs.count %>)</h4>
+              <div class="evidence-list">
+                <% supporting_docs.each do |evidence| %>
+                  <div class="evidence-item">
+                    <div class="evidence-filename"><%= evidence.filename %></div>
+                    <div class="evidence-date"><%= evidence.created_at.strftime("%d %b %Y") %></div>
+                    <div class="evidence-actions">
+                      <%= link_to "View", evidence_path(evidence), class: "link-btn" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="next-actions">
+            <%= button_to "Run Extraction", "/tax_returns/#{@tax_return.id}/extractions/run", method: :post, class: "btn btn-success" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
   </div>
-<% end %>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .upload-evidence-page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .error-banner {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+  }
+
+  .error-banner h2 {
+    color: #dc3545;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-banner ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .error-banner li {
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+
+  .workflow-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .workflow-step {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+  }
+
+  .workflow-step.active {
+    border-color: #667eea;
+    background-color: #f0f4ff;
+  }
+
+  .workflow-step:hover {
+    border-color: #667eea;
+  }
+
+  .step-number {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  .workflow-step h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .step-description {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .upload-box {
+    border: 2px dashed #667eea;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 1rem;
+  }
+
+  .upload-box:hover {
+    border-color: #764ba2;
+    background-color: #f8f9fa;
+  }
+
+  .upload-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload-box label {
+    display: block;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  .file-help {
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .examples {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .examples p {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .examples ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .examples li {
+    color: #666;
+    padding: 0.25rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  .examples li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #00d084 0%, #00a86b 100%);
+    color: white;
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 208, 132, 0.3);
+  }
+
+  .info-section {
+    background-color: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin: 2rem 0;
+  }
+
+  .info-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .info-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .info-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background-color: #667eea;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .info-text strong {
+    display: block;
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+
+  .info-text p {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .uploaded-evidence {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #eee;
+  }
+
+  .uploaded-evidence h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .evidence-section {
+    margin-bottom: 2rem;
+  }
+
+  .evidence-section h4 {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .evidence-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+
+  .evidence-filename {
+    flex: 1;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .evidence-date {
+    color: #999;
+    font-size: 0.85rem;
+    margin: 0 1rem;
+  }
+
+  .evidence-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .link-btn {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+  }
+
+  .link-btn:hover {
+    color: #764ba2;
+  }
+
+  .next-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .workflow-container {
+      grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+    }
+
+    .info-steps {
+      grid-template-columns: 1fr;
+    }
+
+    .evidence-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .evidence-date {
+      margin: 0;
+    }
+  }
+</style>
