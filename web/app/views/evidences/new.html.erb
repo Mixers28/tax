@@ -318,11 +318,17 @@
     cursor: pointer;
     transition: all 0.3s;
     margin-bottom: 1rem;
+    user-select: none;
   }
 
   .upload-box:hover {
     border-color: #764ba2;
     background-color: #f8f9fa;
+  }
+
+  .upload-box.dragover {
+    border-color: #764ba2;
+    background-color: #f0f4ff;
   }
 
   .upload-icon {
@@ -583,3 +589,68 @@
     }
   }
 </style>
+
+<script>
+  document.querySelectorAll('.upload-box').forEach(uploadBox => {
+    const fileInput = uploadBox.querySelector('.file-input');
+    const label = uploadBox.querySelector('label');
+
+    // Make the entire upload box clickable
+    uploadBox.addEventListener('click', (e) => {
+      // Only trigger if not clicking on the label itself
+      if (e.target !== label && !e.target.closest('label')) {
+        fileInput.click();
+      }
+    });
+
+    // Make the label clickable too
+    label.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.click();
+    });
+
+    // Drag and drop functionality
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadBox.style.borderColor = '#764ba2';
+      uploadBox.style.backgroundColor = '#f0f4ff';
+    });
+
+    uploadBox.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadBox.style.borderColor = '#667eea';
+      uploadBox.style.backgroundColor = 'white';
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadBox.style.borderColor = '#667eea';
+      uploadBox.style.backgroundColor = 'white';
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        // Optionally trigger form submission or show file count
+        const form = fileInput.closest('form');
+        if (form) {
+          // Update label to show selected files
+          const fileCount = fileInput.files.length;
+          const fileNames = Array.from(fileInput.files).map(f => f.name).join(', ');
+          label.textContent = `${fileCount} file(s) selected: ${fileNames.substring(0, 50)}...`;
+        }
+      }
+    });
+
+    // Update label when files are selected via file picker
+    fileInput.addEventListener('change', (e) => {
+      if (fileInput.files.length > 0) {
+        const fileCount = fileInput.files.length;
+        const fileNames = Array.from(fileInput.files).map(f => f.name).join(', ');
+        label.textContent = `${fileCount} file(s) selected: ${fileNames.substring(0, 50)}...`;
+      }
+    });
+  });
+</script>
