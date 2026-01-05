@@ -4,7 +4,22 @@ class PDFExportService
   def initialize(tax_return, export)
     @tax_return = tax_return
     @export = export
-    @pdf = Prawn::Document.new(margin: 40)
+    # Use DejaVuSans font which supports UTF-8 characters including German umlauts
+    @pdf = Prawn::Document.new(
+      margin: 40,
+      skip_page_creation: false
+    )
+    # Register DejaVu fonts for full UTF-8 support
+    font_path = "#{Prawn::BASEDIR}/data/fonts"
+    @pdf.font_families.update(
+      "DejaVu" => {
+        normal: "#{font_path}/DejaVuSans.ttf",
+        bold: "#{font_path}/DejaVuSans-Bold.ttf",
+        italic: "#{font_path}/DejaVuSans-Oblique.ttf",
+        bold_italic: "#{font_path}/DejaVuSans-BoldOblique.ttf"
+      }
+    )
+    @pdf.font("DejaVu")
   end
 
   def generate
