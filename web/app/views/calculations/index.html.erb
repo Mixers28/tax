@@ -1,0 +1,400 @@
+<div class="container">
+  <div class="calculations-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <h1>Tax Calculations</h1>
+      <p class="subtitle">Perform tax relief calculations for <%= @tax_return.tax_year.label %></p>
+    </div>
+
+    <div class="content">
+      <div class="calculator-section">
+        <h2>Available Calculations</h2>
+        <p class="section-description">Choose a calculation to perform:</p>
+
+        <div class="calculator-buttons">
+          <% if @tax_return.calculator_enabled?("ftcr") %>
+            <%= button_to "Calculate FTCR", "/tax_returns/#{@tax_return.id}/calculations/calculate_ftcr", method: :post, class: "calculator-btn ftcr" %>
+          <% end %>
+          <% if @tax_return.calculator_enabled?("gift_aid") %>
+            <%= button_to "Calculate Gift Aid", "/tax_returns/#{@tax_return.id}/calculations/calculate_gift_aid", method: :post, class: "calculator-btn gift-aid" %>
+          <% end %>
+          <% if @tax_return.calculator_enabled?("hicbc") %>
+            <%= button_to "Calculate HICBC", "/tax_returns/#{@tax_return.id}/calculations/calculate_hicbc", method: :post, class: "calculator-btn hicbc" %>
+          <% end %>
+        </div>
+
+        <% if @tax_return.enabled_calculators_list.empty? %>
+          <div class="empty-calculators">
+            <p>No calculators enabled. Add calculators to get started.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <% if @calculations.any? %>
+        <div class="calculations-history">
+          <h2>Calculation History</h2>
+          <div class="calculations-list">
+            <% @calculations.each do |calc| %>
+              <div class="calculation-item">
+                <div class="calc-header">
+                  <h3><%= calc.calculation_type.upcase %></h3>
+                  <span class="calc-date"><%= calc.created_at.strftime("%d %b %Y at %H:%M") %></span>
+                </div>
+
+                <div class="calc-details">
+                  <div class="detail-row">
+                    <label>Result:</label>
+                    <strong>£<%= number_with_precision(calc.result_value_gbp, precision: 2) %></strong>
+                  </div>
+                  <div class="detail-row">
+                    <label>Confidence:</label>
+                    <strong><%= (calc.confidence_score * 100).to_i %>%</strong>
+                  </div>
+                </div>
+
+                <% if calc.calculation_steps.present? %>
+                  <div class="calc-steps">
+                    <p><strong>Calculation Steps:</strong></p>
+                    <ul>
+                      <% calc.calculation_steps.each do |step| %>
+                        <li><%= step["label"] %> → <strong><%= step["value"] %></strong></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+
+                <% if calc.input_values.present? %>
+                  <div class="calc-inputs">
+                    <p><strong>Input Values:</strong></p>
+                    <ul>
+                      <% calc.input_values.each do |key, value| %>
+                        <li><%= key.to_s.humanize %>: <code><%= value %></code></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <p>No calculations yet. Choose one above to get started.</p>
+        </div>
+      <% end %>
+
+      <div class="info-section">
+        <h2>About These Calculations</h2>
+        <div class="info-box">
+          <h3>Furnished Temporary Accommodation Relief (FTCR)</h3>
+          <p>Calculates 50% relief on net rental income from furnished temporary accommodation.</p>
+          <p><strong>Formula:</strong> Relief = Net Income × 50%</p>
+        </div>
+
+        <div class="info-box">
+          <h3>Gift Aid</h3>
+          <p>Calculates the gross value and basic rate relief on charitable donations made with Gift Aid.</p>
+          <p><strong>Formula:</strong> Gross = Donation × (1 + 25/75), Relief = Donation × 20%</p>
+        </div>
+
+        <div class="info-box">
+          <h3>High Income Child Benefit Charge (HICBC)</h3>
+          <p>Calculates the charge where adjusted net income exceeds £60,000.</p>
+          <p><strong>Formula:</strong> Charge = Child Benefit × ((Income - £60,000) × 1%)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .calculations-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .calculator-section {
+    margin-bottom: 3rem;
+  }
+
+  .calculator-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .section-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .calculator-btn {
+    padding: 1.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s;
+    text-align: center;
+  }
+
+  .calculator-btn.ftcr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .calculator-btn.ftcr:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .calculator-btn.gift-aid {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .calculator-btn.gift-aid:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+  }
+
+  .calculator-btn.hicbc {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .calculator-btn.hicbc:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+  }
+
+  .calculations-history {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #eee;
+  }
+
+  .calculations-history h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .calculations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .calculation-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+  }
+
+  .calc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .calc-header h3 {
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .calc-date {
+    font-size: 0.9rem;
+    color: #999;
+  }
+
+  .calc-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .detail-row label {
+    color: #666;
+    font-weight: 500;
+  }
+
+  .detail-row strong {
+    color: #667eea;
+    font-size: 1.1rem;
+  }
+
+  .calc-steps,
+  .calc-inputs {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+  }
+
+  .calc-steps p,
+  .calc-inputs p {
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .calc-steps ul,
+  .calc-inputs ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .calc-steps li,
+  .calc-inputs li {
+    padding: 0.5rem 0;
+    color: #666;
+  }
+
+  code {
+    background-color: #f0f0f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+    color: #333;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #999;
+    font-style: italic;
+  }
+
+  .info-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #eee;
+  }
+
+  .info-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .info-box {
+    background-color: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .info-box h3 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-box p {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-calculators {
+    background-color: #fff5f5;
+    border: 1px solid #fee;
+    border-radius: 4px;
+    padding: 1.5rem;
+    text-align: center;
+    color: #666;
+    margin-top: 1rem;
+  }
+
+  .empty-calculators p {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .calculator-buttons {
+      grid-template-columns: 1fr;
+    }
+
+    .calc-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .calc-details {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
