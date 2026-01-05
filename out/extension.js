@@ -5,6 +5,10 @@ exports.deactivate = deactivate;
 const vscode = require("vscode");
 const path = require("path");
 function activate(context) {
+    const startCommand = vscode.commands.registerCommand('context7.start', () => {
+        // No-op; activation registers the MCP server definition provider.
+    });
+    context.subscriptions.push(startCommand);
     // Register Context7 MCP Server
     context.subscriptions.push(vscode.lm.registerMcpServerDefinitionProvider('context7', {
         provideMcpServerDefinitions() {

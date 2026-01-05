@@ -12,9 +12,10 @@ class EvidenceTest < ActiveSupport::TestCase
       content_type: "text/plain"
     )
 
-    assert evidence.valid?
+    assert evidence.save!
     assert_equal "sample.txt", evidence.filename
     assert_equal "text/plain", evidence.mime
+    assert_equal Digest::SHA256.hexdigest(file_fixture("sample.txt").read), evidence.reload.sha256
   end
 
   test "requires a file attachment" do

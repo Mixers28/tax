@@ -1,0 +1,294 @@
+<div class="container">
+  <div class="dashboard">
+    <div class="header">
+      <div class="title-section">
+        <h1>Tax Returns</h1>
+        <p class="subtitle">Manage your SA Self Assessment tax returns</p>
+      </div>
+      <div class="header-actions">
+        <span class="user-info">Logged in as: <strong><%= current_user.email %></strong></span>
+        <%= link_to "Logout", logout_path, method: :delete, class: "btn btn-secondary" %>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="actions-bar">
+        <%= form_with url: tax_returns_path, method: :post, local: true do |f| %>
+          <%= f.submit "Create New Tax Return", class: "btn btn-primary btn-lg" %>
+        <% end %>
+      </div>
+
+      <% if @tax_returns.any? %>
+        <div class="returns-list">
+          <h2>Your Tax Returns</h2>
+          <table class="returns-table">
+            <thead>
+              <tr>
+                <th>Tax Year</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @tax_returns.each do |tr| %>
+                <tr>
+                  <td>
+                    <strong><%= link_to tr.tax_year.label, tax_return_path(tr), class: "link" %></strong>
+                  </td>
+                  <td>
+                    <span class="status status-<%= tr.status %>"><%= tr.status.titleize %></span>
+                  </td>
+                  <td><%= tr.created_at.strftime("%d %b %Y") %></td>
+                  <td>
+                    <div class="action-links">
+                      <%= link_to "View", tax_return_path(tr), class: "link-btn" %>
+                      <%= link_to "Export", tax_return_exports_path(tr), class: "link-btn" %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <div class="empty-icon">📄</div>
+          <h2>No Tax Returns Yet</h2>
+          <p>Create your first tax return to get started</p>
+          <%= form_with url: tax_returns_path, method: :post, local: true do |f| %>
+            <%= f.submit "Create Tax Return", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-section h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-info {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .actions-bar {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .returns-list {
+    margin-top: 2rem;
+  }
+
+  .returns-list h2 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .returns-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .returns-table th,
+  .returns-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .returns-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .returns-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .status {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .status-draft {
+    background-color: #ffeaa7;
+    color: #d63031;
+  }
+
+  .status-submitted {
+    background-color: #a29bfe;
+    color: #2d3436;
+  }
+
+  .status-approved {
+    background-color: #81ecec;
+    color: #2d3436;
+  }
+
+  .action-links {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .link-btn {
+    padding: 0.5rem 1rem;
+    background-color: #667eea;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+  }
+
+  .link-btn:hover {
+    background-color: #5568d3;
+  }
+
+  .link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .header-actions {
+      width: 100%;
+    }
+
+    .returns-table {
+      font-size: 0.9rem;
+    }
+
+    .returns-table th,
+    .returns-table td {
+      padding: 0.75rem;
+    }
+
+    .action-links {
+      flex-direction: column;
+    }
+  }
+</style>

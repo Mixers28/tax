@@ -1,17 +1,650 @@
-<h1>Evidence</h1>
+<div class="container">
+  <div class="evidence-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@evidence.tax_return) %>
+      </div>
+      <h1>Evidence: <%= @evidence.filename %></h1>
+      <p class="subtitle">Review and extract data from <%= @evidence.tax_return.tax_year.label %></p>
+    </div>
 
-<p>
-  <strong>Tax return:</strong>
-  <%= @evidence.tax_return_id %>
-</p>
+    <div class="content">
+      <div class="evidence-section">
+        <div class="file-info">
+          <div class="info-row">
+            <label>Filename:</label>
+            <span><%= @evidence.filename %></span>
+          </div>
+          <div class="info-row">
+            <label>Upload Date:</label>
+            <span><%= @evidence.created_at.strftime("%d %b %Y at %H:%M") %></span>
+          </div>
+          <% if @evidence.file.attached? %>
+            <div class="info-row">
+              <label>File Size:</label>
+              <span><%= number_to_human_size(@evidence.file.byte_size) %></span>
+            </div>
+          <% end %>
+        </div>
 
-<p>
-  <strong>Filename:</strong>
-  <%= @evidence.filename %>
-</p>
+        <% if @evidence.file.attached? %>
+          <div class="file-download">
+            <%= link_to "Download File", rails_blob_path(@evidence.file, disposition: "attachment"), class: "btn btn-secondary" %>
+          </div>
+        <% end %>
+      </div>
 
-<% if @evidence.file.attached? %>
-  <p>
-    <%= link_to "Download file", rails_blob_path(@evidence.file, disposition: "attachment") %>
-  </p>
-<% end %>
+      <hr class="section-divider">
+
+      <div class="extraction-section">
+        <h2>Data Extraction</h2>
+        <p class="section-description">Extract tax values from this document using AI.</p>
+
+        <% if @evidence.extraction_runs.any? %>
+          <% latest_run = @evidence.extraction_runs.order(created_at: :desc).first %>
+
+          <div class="extraction-status status-<%= latest_run.status %>">
+            <div class="status-header">
+              <span class="status-badge <%= latest_run.status %>"><%= latest_run.status.upcase %></span>
+              <% if latest_run.model.present? %>
+                <span class="model-info">Model: <%= latest_run.model %></span>
+              <% end %>
+              <span class="extraction-date"><%= latest_run.created_at.strftime("%d %b %Y at %H:%M") %></span>
+            </div>
+
+            <% if latest_run.error_message.present? %>
+              <div class="error-message">
+                <strong>Error:</strong> <%= latest_run.error_message %>
+              </div>
+            <% end %>
+
+            <% if latest_run.candidates.present? %>
+              <div class="candidates-section">
+                <h3>Extracted Values</h3>
+                <p class="candidates-description">Review and accept the extracted tax values below:</p>
+
+                <div class="candidates-list">
+                  <% latest_run.candidates.each_with_index do |candidate, index| %>
+                    <div class="candidate-item">
+                      <div class="candidate-header">
+                        <div class="candidate-location">
+                          <span class="form-badge"><%= candidate["form"] %></span>
+                          <span class="location">Page <%= candidate["page"] %>, Box <%= candidate["box"] %></span>
+                        </div>
+                        <% if candidate["instance"].present? %>
+                          <span class="instance">Instance <%= candidate["instance"] %></span>
+                        <% end %>
+                      </div>
+
+                      <div class="candidate-details">
+                        <div class="detail-row">
+                          <label>Extracted Value:</label>
+                          <span class="value"><strong><%= candidate["value_raw"] %></strong></span>
+                        </div>
+                        <% if candidate["confidence"].present? %>
+                          <div class="detail-row">
+                            <label>Confidence:</label>
+                            <span class="confidence <%= confidence_class(candidate["confidence"]) %>">
+                              <%= (candidate["confidence"] * 100).to_i %>%
+                            </span>
+                          </div>
+                        <% end %>
+                        <% if candidate["note"].present? %>
+                          <div class="detail-row">
+                            <label>Note:</label>
+                            <span class="note"><%= candidate["note"] %></span>
+                          </div>
+                        <% end %>
+                      </div>
+
+                      <div class="candidate-action">
+                        <% if candidate["box_definition_id"] %>
+                          <%= button_to "Accept Value", accept_candidate_extraction_run_path(latest_run, candidate_index: index), method: :post, class: "btn btn-success" %>
+                        <% else %>
+                          <span class="no-match">⚠ No matching box definition</span>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <div class="no-candidates">
+                <p>No values extracted yet. Click "Run Extraction" to analyze this document.</p>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="empty-extraction">
+            <p>No extraction has been run on this document yet.</p>
+            <p>Click "Run Extraction" to analyze this document and extract tax values using AI.</p>
+          </div>
+        <% end %>
+
+        <div class="extraction-actions">
+          <%= button_to "Run Extraction", evidence_extraction_runs_path(@evidence), method: :post, class: "btn btn-primary btn-lg" %>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="next-steps-section">
+        <h2>Next Steps</h2>
+        <div class="steps-container">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3>Extract Values</h3>
+              <p>Run extraction above to identify tax values in this document.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3>Accept Values</h3>
+              <p>Review and accept extracted values to add them to your tax return.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3>Upload More Evidence</h3>
+              <p>Upload additional documents to extract more values.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3>Run Validations</h3>
+              <p>Verify your tax return data for completeness and accuracy.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <%= link_to "Upload More Evidence", new_evidence_path(tax_return_id: @evidence.tax_return_id), class: "btn btn-secondary" %>
+          <%= link_to "Go to Tax Return", tax_return_path(@evidence.tax_return), class: "btn btn-secondary" %>
+          <%= link_to "Run Validations", "/tax_returns/#{@evidence.tax_return.id}/validations", class: "btn btn-primary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .evidence-page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 2px solid #eee;
+    margin: 2rem 0;
+  }
+
+  .evidence-section {
+    margin-bottom: 1rem;
+  }
+
+  .file-info {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-row label {
+    font-weight: 600;
+    color: #666;
+  }
+
+  .info-row span {
+    color: #333;
+  }
+
+  .file-download {
+    margin-bottom: 1rem;
+  }
+
+  .extraction-section {
+    margin-bottom: 2rem;
+  }
+
+  .extraction-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .section-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .extraction-status {
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .extraction-status.status-success {
+    background-color: #f0f8f4;
+    border-left: 4px solid #28a745;
+  }
+
+  .extraction-status.status-failed {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+  }
+
+  .extraction-status.status-pending {
+    background-color: #fffbf0;
+    border-left: 4px solid #ffc107;
+  }
+
+  .status-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+  }
+
+  .status-badge.success {
+    background-color: #28a745;
+  }
+
+  .status-badge.failed {
+    background-color: #dc3545;
+  }
+
+  .status-badge.pending {
+    background-color: #ffc107;
+    color: #333;
+  }
+
+  .model-info {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .extraction-date {
+    color: #999;
+    font-size: 0.9rem;
+  }
+
+  .error-message {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: #856404;
+  }
+
+  .candidates-section {
+    margin-top: 1.5rem;
+  }
+
+  .candidates-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .candidates-description {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .candidates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .candidate-item {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+  }
+
+  .candidate-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  }
+
+  .candidate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .candidate-location {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-badge {
+    background-color: #667eea;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .location {
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  .instance {
+    background-color: #e9ecef;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #333;
+  }
+
+  .candidate-details {
+    margin-bottom: 1rem;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  .detail-row label {
+    font-weight: 500;
+    color: #666;
+  }
+
+  .detail-row span {
+    color: #333;
+  }
+
+  .value {
+    font-family: monospace;
+    background-color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid #dee2e6;
+  }
+
+  .confidence {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .confidence.high {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .confidence.medium {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .confidence.low {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .note {
+    color: #999;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .candidate-action {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .no-match {
+    color: #dc3545;
+    font-weight: 500;
+  }
+
+  .no-candidates,
+  .empty-extraction {
+    background-color: #f8f9fa;
+    border: 1px dashed #dee2e6;
+    border-radius: 6px;
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+  }
+
+  .extraction-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    text-align: center;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .next-steps-section {
+    margin-top: 2rem;
+  }
+
+  .next-steps-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .steps-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .step {
+    display: flex;
+    gap: 1rem;
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+  }
+
+  .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #667eea;
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .step-content h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .step-content p {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .candidate-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .detail-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    .steps-container {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-buttons .btn {
+      width: 100%;
+    }
+  }
+</style>

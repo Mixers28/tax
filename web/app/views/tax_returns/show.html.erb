@@ -17,6 +17,7 @@
         <a href="#validations" class="tab-button" data-tab="validations">Validations</a>
         <a href="#calculations" class="tab-button" data-tab="calculations">Calculations</a>
         <a href="#exports" class="tab-button" data-tab="exports">Exports</a>
+        <a href="#settings" class="tab-button" data-tab="settings">Settings</a>
       </div>
 
       <div id="overview" class="tab-content active">
@@ -48,7 +49,7 @@
             <%= link_to "Upload Evidence", new_evidence_path(tax_return_id: @tax_return.id), class: "btn btn-primary" %>
             <%= link_to "Run Validations", tax_return_validations_path(@tax_return), class: "btn btn-secondary" %>
             <%= link_to "View Calculations", tax_return_calculations_path(@tax_return), class: "btn btn-secondary" %>
-            <%= link_to "Generate Export", tax_return_exports_path(@tax_return), method: :post, class: "btn btn-primary" %>
+            <%= link_to "Review & Export", "/tax_returns/#{@tax_return.id}/exports/review", class: "btn btn-primary" %>
           </div>
         </div>
       </div>
@@ -121,28 +122,68 @@
       <div id="exports" class="tab-content">
         <div class="section">
           <h2>Exports</h2>
+          <p><%= link_to "Review & Generate New Export", "/tax_returns/#{@tax_return.id}/exports/review", class: "btn btn-primary" %></p>
+
           <% if @tax_return.exports.any? %>
             <div class="exports-list">
+              <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Previous Exports</h3>
               <% @tax_return.exports.each do |export| %>
                 <div class="export-item">
                   <p><strong>Export #<%= export.id %></strong></p>
                   <p class="text-muted">Generated: <%= export.exported_at.strftime("%d %b %Y at %H:%M") %></p>
                   <div class="export-actions">
                     <% if export.file_path.present? %>
-                      <%= link_to "PDF", tax_return_export_download_pdf_path(@tax_return, export), class: "link-btn" %>
+                      <%= link_to "PDF", download_pdf_tax_return_export_path(@tax_return, export), class: "link-btn" %>
                     <% end %>
                     <% if export.json_path.present? %>
-                      <%= link_to "JSON", tax_return_export_download_json_path(@tax_return, export), class: "link-btn" %>
+                      <%= link_to "JSON", download_json_tax_return_export_path(@tax_return, export), class: "link-btn" %>
                     <% end %>
                   </div>
                 </div>
               <% end %>
             </div>
           <% else %>
-            <p class="empty-message">No exports yet</p>
-            <%= form_with url: tax_return_exports_path(@tax_return), method: :post, local: true do |f| %>
-              <%= f.submit "Generate Export", class: "btn btn-primary" %>
-            <% end %>
+            <p class="empty-message">No exports yet. Start by reviewing your data and generating an export.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <div id="settings" class="tab-content">
+        <div class="section">
+          <h2>Calculator Settings</h2>
+          <p class="settings-description">Select which tax calculations are relevant to your tax return.</p>
+
+          <%= form_with url: update_calculator_settings_tax_return_path(@tax_return), method: :patch, local: true do |f| %>
+            <div class="calculators-grid">
+              <% TaxReturn::AVAILABLE_CALCULATORS.each do |code, label| %>
+                <div class="calculator-card">
+                  <div class="calculator-header">
+                    <input
+                      type="checkbox"
+                      name="calculators[]"
+                      value="<%= code %>"
+                      id="calculator_<%= code %>"
+                      <%= 'checked' if @tax_return.calculator_enabled?(code) %>
+                      class="calculator-checkbox"
+                    />
+                    <label for="calculator_<%= code %>" class="calculator-label"><%= label %></label>
+                  </div>
+                  <div class="calculator-description">
+                    <% description_map = {
+                      ftcr: "Relief for furnished holiday accommodation. Only if you rent out furnished holiday properties.",
+                      gift_aid: "Tax relief on charitable donations. Enable if you made charitable contributions.",
+                      hicbc: "High Income Child Benefit Charge. Only applies if you have income over £50,000."
+                    } %>
+                    <p><%= description_map[code] %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="settings-actions">
+              <%= f.submit "Save Settings", class: "btn btn-primary" %>
+              <%= link_to "Cancel", tax_return_path(@tax_return), class: "btn btn-secondary" %>
+            </div>
           <% end %>
         </div>
       </div>
@@ -412,6 +453,70 @@
     margin-bottom: 1rem;
   }
 
+  .settings-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .calculators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .calculator-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1.5rem;
+    background-color: #fafbfc;
+    transition: all 0.3s;
+  }
+
+  .calculator-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  }
+
+  .calculator-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .calculator-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+  }
+
+  .calculator-label {
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .calculator-description {
+    margin-left: 2.5rem;
+    padding-left: 0;
+  }
+
+  .calculator-description p {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .settings-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
   @media (max-width: 768px) {
     .tabs {
       flex-wrap: wrap;
@@ -431,6 +536,19 @@
     .export-actions {
       margin-top: 1rem;
       width: 100%;
+    }
+
+    .calculators-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .settings-actions {
+      flex-direction: column;
+    }
+
+    .settings-actions .btn {
+      width: 100%;
+      text-align: center;
     }
   }
 </style>

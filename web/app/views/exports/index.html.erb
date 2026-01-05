@@ -1,0 +1,400 @@
+<div class="container">
+  <div class="exports-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <h1>Exports</h1>
+      <p class="subtitle">Download your tax return exports for <%= @tax_return.tax_year.label %></p>
+    </div>
+
+    <div class="content">
+      <div class="actions">
+        <%= button_to "Generate New Export", tax_return_exports_path(@tax_return), method: :post, class: "btn btn-primary btn-lg" %>
+      </div>
+
+      <% if @exports.any? %>
+        <div class="exports-list">
+          <h2>Your Exports</h2>
+          <div class="exports-grid">
+            <% @exports.each do |export| %>
+              <div class="export-card">
+                <div class="export-header">
+                  <h3>Export #<%= export.id %></h3>
+                  <span class="export-date"><%= export.exported_at.strftime("%d %b %Y") %></span>
+                </div>
+
+                <div class="export-info">
+                  <div class="info-row">
+                    <label>Format:</label>
+                    <span>
+                      <% if export.file_path.present? %>
+                        <span class="badge">PDF</span>
+                      <% end %>
+                      <% if export.json_path.present? %>
+                        <span class="badge">JSON</span>
+                      <% end %>
+                    </span>
+                  </div>
+                  <% if export.file_size.present? %>
+                    <div class="info-row">
+                      <label>Size:</label>
+                      <span><%= number_to_human_size(export.file_size) %></span>
+                    </div>
+                  <% end %>
+                  <% if export.file_hash.present? %>
+                    <div class="info-row">
+                      <label>Hash:</label>
+                      <span class="hash"><%= export.file_hash[0..15] %>...</span>
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="export-actions">
+                  <% if export.file_path.present? %>
+                    <%= link_to "Download PDF", download_pdf_tax_return_export_path(@tax_return, export), class: "download-btn pdf" %>
+                  <% end %>
+                  <% if export.json_path.present? %>
+                    <%= link_to "Download JSON", download_json_tax_return_export_path(@tax_return, export), class: "download-btn json" %>
+                  <% end %>
+                </div>
+
+                <% if export.validation_state.present? %>
+                  <div class="export-validation">
+                    <details>
+                      <summary>Validation State</summary>
+                      <pre><%= JSON.pretty_generate(export.validation_state) %></pre>
+                    </details>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <div class="empty-icon">📄</div>
+          <h2>No Exports Yet</h2>
+          <p>Generate an export to create PDF and JSON files of your tax return</p>
+          <%= button_to "Generate Export", tax_return_exports_path(@tax_return), method: :post, class: "btn btn-primary" %>
+        </div>
+      <% end %>
+
+      <div class="info-section">
+        <h2>About Exports</h2>
+        <div class="info-box">
+          <h3>PDF Format</h3>
+          <p>Human-readable document containing all your tax return data, validations, calculations, and evidence references. Perfect for printing or sharing.</p>
+        </div>
+
+        <div class="info-box">
+          <h3>JSON Format</h3>
+          <p>Machine-readable structured data format including metadata, box values, validations, calculations, and audit trail. Ideal for integration with other systems.</p>
+        </div>
+
+        <div class="info-box">
+          <h3>Data Integrity</h3>
+          <p>Each export includes a SHA256 hash for verification. This ensures the data hasn't been modified after export generation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .exports-page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .actions {
+    margin-bottom: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .exports-list h2 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+
+  .exports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .export-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+  }
+
+  .export-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  }
+
+  .export-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .export-header h3 {
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .export-date {
+    font-size: 0.85rem;
+    color: #999;
+  }
+
+  .export-info {
+    margin-bottom: 1.5rem;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .info-row label {
+    color: #666;
+    font-weight: 500;
+  }
+
+  .info-row span {
+    color: #333;
+  }
+
+  .hash {
+    font-family: monospace;
+    background-color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    background-color: #667eea;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.25rem;
+  }
+
+  .export-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .download-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .download-btn.pdf {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .download-btn.pdf:hover {
+    background-color: #c82333;
+  }
+
+  .download-btn.json {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .download-btn.json:hover {
+    background-color: #218838;
+  }
+
+  .export-validation {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .export-validation details {
+    cursor: pointer;
+  }
+
+  .export-validation summary {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+
+  .export-validation pre {
+    background-color: #f5f5f5;
+    padding: 0.75rem;
+    border-radius: 3px;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #eee;
+  }
+
+  .info-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .info-box {
+    background-color: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .info-box h3 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-box p {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .exports-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .export-actions {
+      flex-direction: column;
+    }
+  }
+</style>

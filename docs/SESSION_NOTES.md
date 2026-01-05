@@ -37,6 +37,39 @@
 ## Session Template (Copy/Paste for each new session)
 ## Recent Sessions (last 3-5)
 
+### 2026-01-03
+
+**Participants:** User, Codex Agent  
+**Branch:** main  
+
+### What we worked on
+- Added encrypted Active Storage service fixes and evidence upload flow improvements.
+- Implemented Phase 3 extraction pipeline: PDF text extraction, Ollama integration, review/accept UI, and audit logs.
+- Added draft tax return creation path for evidence uploads and updated docs/README.
+- Resolved runtime errors in encryption, checksum verification, and file digest timing.
+
+### Files touched
+- docs/NOW.md
+- docs/PROJECT_CONTEXT.md
+- docs/spec.md
+- web/README.md
+- web/config/routes.rb
+- web/lib/active_storage/service/encrypted_disk_service.rb
+- web/app/controllers/evidences_controller.rb
+- web/app/controllers/extraction_runs_controller.rb
+- web/app/controllers/tax_returns_controller.rb
+- web/app/models/evidence.rb
+- web/app/models/extraction_run.rb
+- web/app/services/ollama_extraction_service.rb
+- web/app/services/pdf_text_extraction_service.rb
+- web/app/views/evidences/new.html.erb
+- web/app/views/evidences/show.html.erb
+- web/db/migrate/20260101091200_create_extraction_runs.rb
+
+### Outcomes / Decisions
+- Ollama (gemma3:1b) selected as the local LLM runtime for Phase 3.
+- Encrypted Active Storage runs via a custom service under `web/lib/active_storage/service`.
+
 ### 2026-01-01 (Session 2)
 
 **Participants:** User, Codex Agent  

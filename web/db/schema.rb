@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "audit_logs", force: :cascade do |t|
     t.string "action", null: false
     t.string "actor"
@@ -37,6 +65,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
     t.index ["page_definition_id"], name: "index_box_definitions_on_page_definition_id"
   end
 
+  create_table "box_validations", force: :cascade do |t|
+    t.integer "box_value_id", null: false
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.datetime "expires_at"
+    t.boolean "is_valid", default: false
+    t.datetime "updated_at", null: false
+    t.datetime "validated_at"
+    t.integer "validation_rule_id", null: false
+    t.text "warning_message"
+    t.index ["box_value_id", "validation_rule_id"], name: "index_box_validations_on_box_value_id_and_validation_rule_id", unique: true
+    t.index ["box_value_id"], name: "index_box_validations_on_box_value_id"
+    t.index ["validated_at"], name: "index_box_validations_on_validated_at"
+    t.index ["validation_rule_id"], name: "index_box_validations_on_validation_rule_id"
+  end
+
   create_table "box_values", force: :cascade do |t|
     t.integer "box_definition_id", null: false
     t.datetime "created_at", null: false
@@ -46,7 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
     t.integer "tax_return_id", null: false
     t.datetime "updated_at", null: false
     t.integer "value_gbp"
-    t.string "value_raw"
+    t.text "value_raw"
     t.index ["box_definition_id"], name: "index_box_values_on_box_definition_id"
     t.index ["scenario_id"], name: "index_box_values_on_scenario_id"
     t.index ["tax_return_id", "box_definition_id"], name: "index_box_values_on_tax_return_id_and_box_definition_id", unique: true
@@ -65,14 +109,62 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
 
   create_table "evidences", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.binary "encrypted_blob"
-    t.string "filename", null: false
-    t.string "mime"
-    t.string "sha256"
+    t.string "evidence_type", default: "supporting_document"
+    t.text "filename", null: false
+    t.text "mime"
+    t.text "sha256"
     t.json "tags"
     t.integer "tax_return_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["evidence_type"], name: "index_evidences_on_evidence_type"
     t.index ["tax_return_id"], name: "index_evidences_on_tax_return_id"
+  end
+
+  create_table "export_evidences", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "evidence_id", null: false
+    t.integer "export_id", null: false
+    t.json "referenced_in_values"
+    t.datetime "updated_at", null: false
+    t.index ["evidence_id"], name: "index_export_evidences_on_evidence_id"
+    t.index ["export_id", "evidence_id"], name: "index_export_evidences_on_export_id_and_evidence_id", unique: true
+    t.index ["export_id"], name: "index_export_evidences_on_export_id"
+  end
+
+  create_table "exports", force: :cascade do |t|
+    t.json "calculation_results"
+    t.datetime "created_at", null: false
+    t.json "export_snapshot"
+    t.datetime "exported_at"
+    t.string "file_hash"
+    t.string "file_path"
+    t.integer "file_size"
+    t.string "format", null: false
+    t.string "json_path"
+    t.integer "tax_return_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.json "validation_state"
+    t.index ["exported_at"], name: "index_exports_on_exported_at"
+    t.index ["tax_return_id", "created_at"], name: "index_exports_on_tax_return_id_and_created_at"
+    t.index ["tax_return_id"], name: "index_exports_on_tax_return_id"
+    t.index ["user_id"], name: "index_exports_on_user_id"
+  end
+
+  create_table "extraction_runs", force: :cascade do |t|
+    t.json "candidates"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.integer "evidence_id", null: false
+    t.datetime "finished_at"
+    t.string "model", null: false
+    t.text "prompt"
+    t.text "response_raw"
+    t.datetime "started_at", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["evidence_id"], name: "index_extraction_runs_on_evidence_id"
+    t.index ["status"], name: "index_extraction_runs_on_status"
   end
 
   create_table "form_definitions", force: :cascade do |t|
@@ -94,12 +186,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
     t.index ["form_definition_id"], name: "index_page_definitions_on_form_definition_id"
   end
 
+  create_table "tax_calculations", force: :cascade do |t|
+    t.integer "box_definition_id"
+    t.json "calculation_steps"
+    t.string "calculation_type", null: false
+    t.decimal "confidence_score", precision: 3, scale: 2, default: "1.0"
+    t.datetime "created_at", null: false
+    t.json "input_box_ids"
+    t.json "input_values"
+    t.decimal "result_value_gbp", precision: 15, scale: 2
+    t.integer "tax_return_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["box_definition_id"], name: "index_tax_calculations_on_box_definition_id"
+    t.index ["tax_return_id", "calculation_type"], name: "index_tax_calculations_on_tax_return_id_and_calculation_type"
+    t.index ["tax_return_id"], name: "index_tax_calculations_on_tax_return_id"
+  end
+
   create_table "tax_returns", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "enabled_calculators", default: "gift_aid,hicbc"
     t.string "status", default: "draft", null: false
     t.integer "tax_year_id", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["enabled_calculators"], name: "index_tax_returns_on_enabled_calculators"
     t.index ["tax_year_id"], name: "index_tax_returns_on_tax_year_id"
+    t.index ["user_id"], name: "index_tax_returns_on_user_id"
   end
 
   create_table "tax_years", force: :cascade do |t|
@@ -111,12 +223,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090800) do
     t.index ["label"], name: "index_tax_years_on_label", unique: true
   end
 
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "validation_rules", force: :cascade do |t|
+    t.boolean "active", default: true
+    t.json "condition"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "form_definition_id"
+    t.json "required_field_box_ids"
+    t.string "rule_code", null: false
+    t.string "rule_type", null: false
+    t.string "severity", default: "warning"
+    t.datetime "updated_at", null: false
+    t.index ["form_definition_id", "rule_type"], name: "index_validation_rules_on_form_definition_id_and_rule_type"
+    t.index ["form_definition_id"], name: "index_validation_rules_on_form_definition_id"
+    t.index ["rule_code"], name: "index_validation_rules_on_rule_code", unique: true
+  end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "box_definitions", "page_definitions"
+  add_foreign_key "box_validations", "box_values"
+  add_foreign_key "box_validations", "validation_rules"
   add_foreign_key "box_values", "box_definitions"
   add_foreign_key "box_values", "tax_returns"
   add_foreign_key "evidence_box_values", "box_values"
   add_foreign_key "evidence_box_values", "evidences"
   add_foreign_key "evidences", "tax_returns"
+  add_foreign_key "export_evidences", "evidences"
+  add_foreign_key "export_evidences", "exports"
+  add_foreign_key "exports", "tax_returns"
+  add_foreign_key "exports", "users"
+  add_foreign_key "extraction_runs", "evidences"
   add_foreign_key "page_definitions", "form_definitions"
+  add_foreign_key "tax_calculations", "box_definitions"
+  add_foreign_key "tax_calculations", "tax_returns"
   add_foreign_key "tax_returns", "tax_years"
+  add_foreign_key "tax_returns", "users"
+  add_foreign_key "validation_rules", "form_definitions"
 end

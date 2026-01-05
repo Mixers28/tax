@@ -4,6 +4,7 @@ require "active_storage/service/disk_service"
 require "active_support/key_generator"
 require "active_support/message_encryptor"
 require "base64"
+require "openssl"
 require "stringio"
 
 module ActiveStorage
@@ -16,11 +17,16 @@ module ActiveStorage
       end
 
       derived_key = ActiveSupport::KeyGenerator.new(key).generate_key(salt, 32)
-      @encryptor = ActiveSupport::MessageEncryptor.new(derived_key, cipher: "aes-256-gcm")
+      @encryptor = ActiveSupport::MessageEncryptor.new(
+        derived_key,
+        cipher: "aes-256-gcm",
+        serializer: ActiveSupport::MessageEncryptor::NullSerializer
+      )
     end
 
     def upload(key, io, checksum: nil, **options)
       data = io.read
+      data = data.b
       verify_checksum(data, checksum) if checksum
       encrypted = @encryptor.encrypt_and_sign(data)
       super(key, StringIO.new(encrypted), checksum: nil, **options)
@@ -49,10 +55,20 @@ module ActiveStorage
     end
 
     def verify_checksum(data, checksum)
-      digest = ActiveStorage.checksum_implementation.digest(data)
+      digest = checksum_digest(data)
       encoded = Base64.strict_encode64(digest)
       unless ActiveSupport::SecurityUtils.secure_compare(encoded, checksum)
         raise ActiveStorage::IntegrityError
+      end
+    end
+
+    def checksum_digest(data)
+      if ActiveStorage.respond_to?(:checksum_implementation)
+        ActiveStorage.checksum_implementation.digest(data)
+      elsif defined?(ActiveStorage::ChecksumImplementation)
+        ActiveStorage::ChecksumImplementation.digest(data)
+      else
+        OpenSSL::Digest::MD5.digest(data)
       end
     end
   end

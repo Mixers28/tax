@@ -33,8 +33,8 @@
 - Exporter: Worksheet and JSON export with evidence links.
 
 ### LLM Extraction Service
-- Local inference runtime (for example, llama.cpp or a local HTTP service) running a 1.1B parameter model.
-- Runs on the same machine with no network calls.
+- Local inference runtime (Ollama) running a 1.1B parameter model.
+- Runs on the same machine with no outbound network calls; app talks to a local HTTP endpoint.
 - Accepts PDF text or extracted text and returns structured candidates plus confidence metadata.
 - All outputs are treated as suggestions and require explicit user confirmation.
 
@@ -72,7 +72,7 @@
 
 ### Phase 3 - Offline PDF extraction
 - Add PDF text extraction pipeline.
-- Integrate local LLM runner (1.1B model, offline).
+- Integrate Ollama local runner (1.1B model, offline).
 - UI for candidate review and acceptance.
 - Audit log for extraction suggestions and user confirmations.
 
@@ -90,4 +90,4 @@
 
 ## Assumptions / Open Questions
 - PDFs are text-based unless we explicitly add offline OCR; confirm whether OCR is in scope.
-- Confirm the preferred local LLM runtime and model packaging approach.
+- Ollama is run locally on the host (not inside the app container) for Phase 3.

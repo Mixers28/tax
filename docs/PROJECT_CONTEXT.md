@@ -7,7 +7,7 @@
 **Summary (auto-maintained by Agent):**
 - Local-first web app for UK Self Assessment 2024-25 using HMRC paper forms as the canonical schema.
 - Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
-- Immediate focus: extract box definitions from HMRC forms and build a boxes-first registry + data capture.
+- Current focus: Phase 3 offline PDF extraction with local Ollama integration.
 <!-- SUMMARY_END -->
 
 ---
@@ -37,6 +37,7 @@
 - Framework(s): Rails 7 + Hotwire.
 - Database / storage: SQLite for MVP; encrypted local storage for sensitive data.
 - Hosting / deployment: Local Docker Compose from Sprint 1.
+- Local LLM runtime: Ollama (gemma3:1b) via localhost for offline extraction.
 - Non-negotiable constraints:
   - No external calls by default; isolation required.
   - Documentation stays in plain Markdown for easy review.

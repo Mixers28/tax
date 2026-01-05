@@ -5,16 +5,16 @@
 
 <!-- SUMMARY_START -->
 **Current Focus (auto-maintained by Agent):**
-- Implement Rails + Docker Compose scaffold with local-only defaults.
-- Build the boxes-first registry schema and seed pipeline from extracted boxes.
-- Prepare next-phase tasks for data capture UI and validation.
+- Phase 3: Offline PDF extraction pipeline and review flow.
+- Ollama (gemma3:1b) local integration for candidate box values.
+- Validate extraction results and acceptance flow end-to-end.
 <!-- SUMMARY_END -->
 
 ---
 
 ## Current Objective
 
-Prepare the boxes-first foundation and Rails + Docker scaffold for the UK Self Assessment helper.
+Build the offline PDF extraction workflow (text extraction -> local LLM suggestions -> review/acceptance).
 
 ---
 
@@ -30,14 +30,24 @@ Prepare the boxes-first foundation and Rails + Docker scaffold for the UK Self A
 - [x] Extract a first-pass box list from the SA forms PDF.
 - [x] Define box registry schema + seed plan from extracted boxes.
 - [x] Draft Docker Compose + Rails skeleton for Sprint 1.
+- [x] Implement encrypted Active Storage for evidence uploads.
+- [x] Add PDF text extraction + Ollama suggestion pipeline and review UI.
 
 ---
 
 ## Next Small Deliverables
 
-- Seed the box registry into the Rails DB (dev setup).
-- Add the first data-entry screen for TR1/TR2.
-- Validate no personal data is stored in repo artifacts.
+- Run an end-to-end extraction on a sample PDF and validate candidate mapping.
+- Add minimal tests for extraction services and controller flow.
+- Decide whether to add offline OCR fallback criteria.
+
+---
+
+## Backlog (Pending)
+
+- [ ] Seed the box registry into the Rails DB (dev setup).
+- [ ] Add the first data-entry screen for TR1/TR2.
+- [ ] Validate no personal data is stored in repo artifacts.
 
 ---
 

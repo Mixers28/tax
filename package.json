@@ -21,9 +21,17 @@
 		"coding"
 	  ],
 	"activationEvents": [
-	  ],
+		"onStartupFinished",
+		"onCommand:context7.start"
+	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"commands": [
+			{
+				"command": "context7.start",
+				"title": "Context7: Start MCP Server"
+			}
+		],
 		"mcpServerDefinitionProviders": [
 			{
 				"id": "context7",

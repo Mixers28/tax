@@ -9,8 +9,51 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Authentication routes
+  get "login", to: "sessions#new"
+  post "login", to: "sessions#create"
+  delete "logout", to: "sessions#destroy"
 
-  resources :evidences, only: [:new, :create, :show]
+  get "signup", to: "users#new"
+  post "signup", to: "users#create"
+
+  # Defines the root path route ("/")
+  root "tax_returns#index"
+
+  resources :tax_returns, only: [:index, :create, :show] do
+    member do
+      patch :update_calculator_settings
+    end
+
+    resources :exports, only: [:index, :create, :show] do
+      collection do
+        get :review
+      end
+      member do
+        get :download_pdf
+        get :download_json
+      end
+    end
+
+    resources :validations, only: [:index] do
+      collection do
+        post :run_validation
+      end
+    end
+
+    resources :calculations, only: [:index] do
+      collection do
+        post :calculate_ftcr
+        post :calculate_gift_aid
+        post :calculate_hicbc
+      end
+    end
+  end
+
+  resources :evidences, only: [:new, :create, :show] do
+    resources :extraction_runs, only: [:create]
+  end
+  resources :extraction_runs, only: [] do
+    post :accept_candidate, on: :member
+  end
 end

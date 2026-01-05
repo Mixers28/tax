@@ -1,0 +1,680 @@
+<div class="container">
+  <div class="review-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <h1>Review & Export</h1>
+      <p class="subtitle">Review all your data before generating the final export</p>
+    </div>
+
+    <div class="content">
+      <!-- Data Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <span class="summary-icon">📊</span>
+          <div>
+            <p class="summary-label">Box Values</p>
+            <p class="summary-value"><%= @box_values.count %> entered</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-icon">✅</span>
+          <div>
+            <p class="summary-label">Validations</p>
+            <p class="summary-value"><%= @validation_results[:passed] %>/<%= @validation_results[:total] %> passed</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-icon">📈</span>
+          <div>
+            <p class="summary-label">Calculations</p>
+            <p class="summary-value"><%= @calculations.count %> completed</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-icon">📎</span>
+          <div>
+            <p class="summary-label">Evidence Files</p>
+            <p class="summary-value"><%= @tax_return.evidences.count %> uploaded</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Status -->
+      <% if @validation_results[:errors].any? || @validation_results[:warnings].any? %>
+        <div class="alert alert-warning">
+          <strong>⚠️ Validation Issues Found</strong>
+          <p><%= @validation_results[:errors].count %> errors and <%= @validation_results[:warnings].count %> warnings need attention before export.</p>
+          <p><small>You can still export, but review the issues first.</small></p>
+        </div>
+      <% elsif @validation_results[:passed] == @validation_results[:total] %>
+        <div class="alert alert-success">
+          <strong>✅ All Validations Passed</strong>
+          <p>Your tax return data is complete and valid. Ready to export.</p>
+        </div>
+      <% end %>
+
+      <!-- Box Values Section -->
+      <div class="section">
+        <h2>📊 Box Values (<%= @box_values.count %>)</h2>
+        <div class="box-values-table">
+          <% if @box_values.any? %>
+            <table>
+              <thead>
+                <tr>
+                  <th>Box Code</th>
+                  <th>Description</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @box_values.each do |box_value| %>
+                  <tr>
+                    <td><strong><%= box_value.box_definition.box_code %></strong></td>
+                    <td><%= box_value.box_definition.hmrc_label %></td>
+                    <td class="value">
+                      <% if box_value.value_gbp.present? %>
+                        £<%= number_with_precision(box_value.value_gbp, precision: 2) %>
+                      <% else %>
+                        <span class="text-muted"><%= box_value.value_raw.present? ? box_value.value_raw : '(empty)' %></span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if box_value.value_raw.present? %>
+                        <span class="badge-success">✓ Filled</span>
+                      <% else %>
+                        <span class="badge-warning">⊘ Empty</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% else %>
+            <p class="empty-message">No box values entered yet</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Validations Section -->
+      <% if @validation_results[:errors].any? || @validation_results[:warnings].any? %>
+        <div class="section">
+          <h2>⚠️ Validation Issues</h2>
+
+          <% if @validation_results[:errors].any? %>
+            <div class="validation-issues errors">
+              <h3>Errors (<%= @validation_results[:errors].count %>)</h3>
+              <ul>
+                <% @validation_results[:errors].each do |error| %>
+                  <li>
+                    <strong><%= error[:rule_code] %></strong>: <%= error[:message] %>
+                    <% if error[:affected_boxes].any? %>
+                      <br><small>Boxes: <%= error[:affected_boxes].join(', ') %></small>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <% if @validation_results[:warnings].any? %>
+            <div class="validation-issues warnings">
+              <h3>Warnings (<%= @validation_results[:warnings].count %>)</h3>
+              <ul>
+                <% @validation_results[:warnings].each do |warning| %>
+                  <li>
+                    <strong><%= warning[:rule_code] %></strong>: <%= warning[:message] %>
+                    <% if warning[:affected_boxes].any? %>
+                      <br><small>Boxes: <%= warning[:affected_boxes].join(', ') %></small>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Calculations Section -->
+      <% if @calculations.any? %>
+        <div class="section">
+          <h2>📈 Calculations (<%= @calculations.count %>)</h2>
+          <div class="calculations-review">
+            <% @calculations.each do |calc| %>
+              <div class="calc-item">
+                <div class="calc-type">
+                  <strong><%= calc.calculation_type.upcase %></strong>
+                  <span class="calc-date"><%= calc.created_at.strftime("%d %b %Y") %></span>
+                </div>
+                <div class="calc-result">
+                  <span class="label">Result:</span>
+                  <span class="value">£<%= number_with_precision(calc.result_value_gbp, precision: 2) %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Evidence Section -->
+      <% if @evidences.any? %>
+        <div class="section">
+          <h2>📎 Evidence Files (<%= @tax_return.evidences.count %>)</h2>
+          <% @evidences.each do |type, evidences| %>
+            <div class="evidence-category">
+              <h3>
+                <% if type == "blank_form" %>
+                  📄 Blank Forms
+                <% else %>
+                  📎 Supporting Documents
+                <% end %>
+                (<%= evidences.count %>)
+              </h3>
+              <ul class="evidence-list">
+                <% evidences.each do |evidence| %>
+                  <li>
+                    <span class="filename"><%= evidence.filename %></span>
+                    <span class="date"><%= evidence.created_at.strftime("%d %b %Y") %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Export Options -->
+      <div class="export-section">
+        <h2>Generate Export</h2>
+        <p class="description">Choose the format(s) you want to export and generate your files.</p>
+
+        <%= form_with url: tax_return_exports_path(@tax_return), method: :post, local: true do |f| %>
+          <div class="format-options">
+            <label class="format-option">
+              <%= f.radio_button :format, "pdf", checked: true %>
+              <div class="option-content">
+                <strong>PDF Only</strong>
+                <p>Human-readable document. Perfect for printing or sharing with accountants.</p>
+              </div>
+            </label>
+
+            <label class="format-option">
+              <%= f.radio_button :format, "json" %>
+              <div class="option-content">
+                <strong>JSON Only</strong>
+                <p>Machine-readable data. Best for integration with other systems.</p>
+              </div>
+            </label>
+
+            <label class="format-option">
+              <%= f.radio_button :format, "both" %>
+              <div class="option-content">
+                <strong>Both PDF & JSON</strong>
+                <p>Get both formats for maximum compatibility and flexibility.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="export-actions">
+            <%= f.submit "Generate Export", class: "btn btn-primary btn-lg" %>
+            <%= link_to "Back", tax_return_path(@tax_return), class: "btn btn-secondary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .review-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 1rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+  }
+
+  .summary-icon {
+    font-size: 2rem;
+  }
+
+  .summary-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  .summary-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .alert {
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  .alert strong {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  .section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .section:last-of-type {
+    border-bottom: none;
+  }
+
+  .section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .box-values-table {
+    overflow-x: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+  }
+
+  thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .value {
+    font-weight: 600;
+    color: #667eea;
+  }
+
+  .badge-success {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .badge-warning {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    background-color: #fff3cd;
+    color: #856404;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .empty-message {
+    color: #999;
+    font-style: italic;
+    padding: 1rem;
+  }
+
+  .validation-issues {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  .validation-issues.errors {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+  }
+
+  .validation-issues.warnings {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+  }
+
+  .validation-issues h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .validation-issues ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .validation-issues li {
+    padding: 0.5rem 0;
+    color: #666;
+  }
+
+  .calculations-review {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .calc-item {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+  }
+
+  .calc-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .calc-date {
+    font-size: 0.85rem;
+    color: #999;
+  }
+
+  .calc-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .calc-result .label {
+    color: #666;
+  }
+
+  .calc-result .value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #667eea;
+  }
+
+  .evidence-category {
+    margin-bottom: 1.5rem;
+  }
+
+  .evidence-category h3 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .evidence-list {
+    list-style: none;
+    padding: 0;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .evidence-list li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .evidence-list li:last-child {
+    border-bottom: none;
+  }
+
+  .filename {
+    color: #333;
+    font-weight: 500;
+  }
+
+  .date {
+    font-size: 0.85rem;
+    color: #999;
+  }
+
+  .export-section {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+  }
+
+  .export-section h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  .format-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .format-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+  }
+
+  .format-option:hover {
+    border-color: #667eea;
+    background-color: #f8f9fa;
+  }
+
+  .format-option input[type="radio"] {
+    margin-top: 0.25rem;
+    cursor: pointer;
+    accent-color: #667eea;
+    width: 20px;
+    height: 20px;
+  }
+
+  .option-content {
+    flex: 1;
+  }
+
+  .option-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #333;
+  }
+
+  .option-content p {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+  }
+
+  .export-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background-color: #dee2e6;
+  }
+
+  .text-muted {
+    color: #999;
+  }
+
+  @media (max-width: 768px) {
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .format-options {
+      grid-template-columns: 1fr;
+    }
+
+    .export-actions {
+      flex-direction: column;
+    }
+
+    .export-actions .btn {
+      width: 100%;
+      text-align: center;
+    }
+
+    table {
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.5rem;
+    }
+  }
+</style>
