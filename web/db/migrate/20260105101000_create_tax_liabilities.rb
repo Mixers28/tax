@@ -1,7 +1,7 @@
 class CreateTaxLiabilities < ActiveRecord::Migration[8.1]
   def change
     create_table :tax_liabilities do |t|
-      t.references :tax_return, null: false, foreign_key: true
+      t.references :tax_return, null: false, foreign_key: true, index: { unique: true }
 
       # Income summary
       t.decimal :total_gross_income, precision: 12, scale: 2, null: false, default: 0
@@ -31,7 +31,5 @@ class CreateTaxLiabilities < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-
-    add_index :tax_liabilities, :tax_return_id, unique: true
   end
 end
