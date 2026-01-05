@@ -1,3 +1,6 @@
+require_relative 'pdf_export_service'
+require_relative 'json_export_service'
+
 class ExportService
   def initialize(tax_return, user, format = "both")
     @tax_return = tax_return
