@@ -25,7 +25,7 @@ class CreateTaxLiabilities < ActiveRecord::Migration[8.1]
       t.decimal :net_liability, precision: 12, scale: 2, null: false, default: 0  # positive = owed, negative = repayment
 
       # Metadata
-      t.jsonb :calculation_inputs, default: {}
+      t.json :calculation_inputs, default: {}
       t.string :calculated_by, default: "user_input"
       t.datetime :calculated_at
 
