@@ -1,0 +1,610 @@
+<div class="container">
+  <div class="export-show-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Exports", tax_return_exports_path(@tax_return) %>
+      </div>
+      <h1>Export #<%= @export.id %></h1>
+      <p class="subtitle">For <%= @tax_return.tax_year.label %> | Generated <%= @export.exported_at.strftime("%d %B %Y at %H:%M:%S") %></p>
+    </div>
+
+    <div class="content">
+      <!-- Export Summary -->
+      <div class="summary-section">
+        <h2>Export Summary</h2>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <label>Format</label>
+            <div class="value">
+              <% if @export.pdf? %>
+                <span class="badge">PDF</span>
+              <% end %>
+              <% if @export.json? %>
+                <span class="badge">JSON</span>
+              <% end %>
+            </div>
+          </div>
+          <div class="summary-item">
+            <label>Export Date</label>
+            <span class="value"><%= @export.exported_at.strftime("%d %b %Y %H:%M") %></span>
+          </div>
+          <div class="summary-item">
+            <label>Status</label>
+            <span class="value">
+              <% if @export.file_path.present? || @export.json_path.present? %>
+                <span class="status-badge success">✓ Ready</span>
+              <% else %>
+                <span class="status-badge pending">⏳ Processing</span>
+              <% end %>
+            </span>
+          </div>
+          <% if @export.file_hash.present? %>
+            <div class="summary-item">
+              <label>Integrity Hash</label>
+              <span class="value hash"><%= @export.file_hash %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Download Section -->
+      <% if @export.file_path.present? || @export.json_path.present? %>
+        <div class="downloads-section">
+          <h2>Download Files</h2>
+          <div class="download-buttons">
+            <% if @export.file_path.present? %>
+              <%= link_to "📥 Download PDF", tax_return_export_download_pdf_path(@tax_return, @export), class: "download-btn pdf" %>
+            <% end %>
+            <% if @export.json_path.present? %>
+              <%= link_to "📥 Download JSON", tax_return_export_download_json_path(@tax_return, @export), class: "download-btn json" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Validation Summary -->
+      <% if @validation_summary.present? && @validation_summary.keys.any? %>
+        <div class="validation-section">
+          <h2>Validation Summary</h2>
+          <div class="validation-grid">
+            <div class="validation-item">
+              <span class="label">Total Rules</span>
+              <span class="value"><%= @validation_summary[:total] || 0 %></span>
+            </div>
+            <div class="validation-item pass">
+              <span class="label">Passed</span>
+              <span class="value"><%= @validation_summary[:valid] || 0 %></span>
+            </div>
+            <div class="validation-item error">
+              <span class="label">Errors</span>
+              <span class="value"><%= @validation_summary[:errors] || 0 %></span>
+            </div>
+            <div class="validation-item warning">
+              <span class="label">Warnings</span>
+              <span class="value"><%= @validation_summary[:warnings] || 0 %></span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Calculations Section -->
+      <% if @calculations.present? && @calculations.keys.any? %>
+        <div class="calculations-section">
+          <h2>Tax Calculations</h2>
+          <div class="calculations-grid">
+            <% @calculations.each do |calc_type, result| %>
+              <% next unless result[:success] %>
+              <div class="calculation-card">
+                <h3><%= result[:calculation_type]&.upcase || calc_type&.upcase %></h3>
+                <% if result[:calculation_steps].present? %>
+                  <div class="calculation-steps">
+                    <% result[:calculation_steps].each do |step| %>
+                      <div class="step">
+                        <span class="label"><%= step[:label] %></span>
+                        <span class="value">£<%= number_with_precision(step[:value].to_f, precision: 2) %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="calculation-result">
+                    <span class="label">Result</span>
+                    <span class="value">£<%= number_with_precision(result[:output_value].to_f, precision: 2) %></span>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Box Values Section -->
+      <% if @box_values.present? && @box_values.any? %>
+        <div class="box-values-section">
+          <h2>Box Values</h2>
+          <table class="box-values-table">
+            <thead>
+              <tr>
+                <th>Box Code</th>
+                <th>Description</th>
+                <th>Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @box_values.each do |bv| %>
+                <tr>
+                  <td><strong><%= bv.box_definition.box_code %></strong></td>
+                  <td><%= bv.box_definition.hmrc_label %></td>
+                  <td>
+                    <% if bv.value_gbp.present? %>
+                      £<%= bv.value_gbp %>
+                    <% elsif bv.value_raw.present? %>
+                      <%= bv.value_raw %>
+                    <% else %>
+                      <em style="color: #999;">—</em>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if bv.value_raw.present? %>
+                      <span class="status-badge success">✓ Filled</span>
+                    <% else %>
+                      <span class="status-badge empty">✗ Empty</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+
+      <!-- Evidence Section -->
+      <% if @evidence_links.present? && @evidence_links.any? %>
+        <div class="evidence-section">
+          <h2>Linked Evidence</h2>
+          <div class="evidence-list">
+            <% @evidence_links.each do |link| %>
+              <div class="evidence-item">
+                <div class="evidence-header">
+                  <% if link.evidence.evidence_type == "blank_form" %>
+                    <span class="evidence-icon">📄</span>
+                  <% else %>
+                    <span class="evidence-icon">📎</span>
+                  <% end %>
+                  <div class="evidence-info">
+                    <h4><%= link.evidence.filename %></h4>
+                    <p class="metadata">
+                      Uploaded <%= link.evidence.created_at.strftime("%d %b %Y") %>
+                      <% if link.referenced_in_values.present? %>
+                        | Referenced in <%= link.referenced_in_values.length %> box value(s)
+                      <% end %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Export Details -->
+      <div class="details-section">
+        <h2>Export Details</h2>
+        <% if @export.export_snapshot.present? %>
+          <details>
+            <summary>Export Snapshot</summary>
+            <pre><%= JSON.pretty_generate(@export.export_snapshot[0..10]) %></pre>
+          </details>
+        <% end %>
+        <% if @export.validation_state.present? %>
+          <details>
+            <summary>Validation State</summary>
+            <pre><%= JSON.pretty_generate(@export.validation_state) %></pre>
+          </details>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .export-show-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    margin-bottom: 1rem;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+  }
+
+  .back-link a:hover {
+    opacity: 1;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    opacity: 0.95;
+    font-size: 0.95rem;
+  }
+
+  .content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Summary Section */
+  .summary-section,
+  .downloads-section,
+  .validation-section,
+  .calculations-section,
+  .box-values-section,
+  .evidence-section,
+  .details-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .summary-section:last-child,
+  .downloads-section:last-child,
+  .validation-section:last-child,
+  .calculations-section:last-child,
+  .box-values-section:last-child,
+  .evidence-section:last-child,
+  .details-section:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .summary-item {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+  }
+
+  .summary-item label {
+    display: block;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .summary-item .value {
+    color: #333;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hash {
+    font-family: monospace;
+    word-break: break-all;
+    background-color: #f5f5f5;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    background-color: #667eea;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.25rem;
+  }
+
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .status-badge.success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-badge.pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .status-badge.empty {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  /* Download Section */
+  .download-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .download-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    max-width: 300px;
+  }
+
+  .download-btn.pdf {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .download-btn.pdf:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+  }
+
+  .download-btn.json {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .download-btn.json:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+  }
+
+  /* Validation Section */
+  .validation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .validation-item {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid #999;
+  }
+
+  .validation-item.pass {
+    border-left-color: #28a745;
+  }
+
+  .validation-item.error {
+    border-left-color: #dc3545;
+  }
+
+  .validation-item.warning {
+    border-left-color: #ffc107;
+  }
+
+  .validation-item .label {
+    display: block;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .validation-item .value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* Calculations Section */
+  .calculations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .calculation-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+
+  .calculation-card h3 {
+    color: #0066cc;
+    margin-bottom: 1rem;
+  }
+
+  .calculation-steps {
+    margin-bottom: 1rem;
+  }
+
+  .step {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .step .label {
+    color: #666;
+  }
+
+  .step .value {
+    color: #333;
+    font-weight: 600;
+  }
+
+  .calculation-result {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    font-weight: bold;
+    color: #28a745;
+  }
+
+  /* Box Values Table */
+  .box-values-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .box-values-table thead {
+    background-color: #f8f9fa;
+  }
+
+  .box-values-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .box-values-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .box-values-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  /* Evidence Section */
+  .evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .evidence-item {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+
+  .evidence-header {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .evidence-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .evidence-info h4 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .evidence-info .metadata {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  /* Details Section */
+  .details-section details {
+    margin-bottom: 1rem;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .details-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #667eea;
+    padding: 0.5rem 0;
+  }
+
+  .details-section pre {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 768px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .download-buttons {
+      flex-direction: column;
+    }
+
+    .download-btn {
+      max-width: none;
+    }
+
+    .validation-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .calculations-grid {
+      grid-template-columns: 1fr;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+</style>
