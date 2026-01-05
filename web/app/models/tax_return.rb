@@ -12,6 +12,11 @@ class TaxReturn < ApplicationRecord
   has_many :exports, dependent: :destroy
   has_many :tax_calculations, dependent: :destroy
 
+  # Phase 5: Tax Calculation Engine
+  has_many :income_sources, dependent: :destroy
+  has_one :tax_liability, dependent: :destroy
+  has_many :tax_calculation_breakdowns, dependent: :destroy
+
   validates :status, presence: true
 
   def calculator_enabled?(calculator_code)
