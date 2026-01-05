@@ -37,7 +37,44 @@
 ## Session Template (Copy/Paste for each new session)
 ## Recent Sessions (last 3-5)
 
-### 2026-01-05
+### 2026-01-05 (Session 2 - Phase 5 Planning)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 5: Full Tax Calculation Engine Specification** - Comprehensive design for income aggregation, tax liability, and NI calculation
+- Analyzed HMRC SA100 (Tax Return) and SA102 (Employment) blank forms to understand canonical box structure
+- Verified blank forms already available in docs/references/ directory
+- Created comprehensive Phase 5 specification document (docs/PHASE_5_SPEC.md) with:
+  - Phase decomposition: 5a (basic income/tax) → 5e (advanced reliefs)
+  - Data model: TaxLiability, IncomeSource, TaxCalculationBreakdown, TaxBand models
+  - Calculation logic for Personal Allowance, tax bands (20%/40%/45%), Class 1 NI (8%/2%)
+  - Service architecture: IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, etc.
+  - Form prefill strategy for SA100/SA102 auto-population with calculated values
+  - Database migrations for all new models
+  - UI/UX changes (Income Entry, Tax Calculation Summary pages)
+  - Acceptance criteria and test strategy
+  - 2024-25 UK tax thresholds and rates
+- Updated context documents (NOW.md, PROJECT_CONTEXT.md, SESSION_NOTES.md) to reflect Phase 5 planning
+
+### Files touched
+- docs/PHASE_5_SPEC.md - Phase 5 specification (NEW)
+- docs/NOW.md - Updated with Phase 5 planning and next deliverables
+- docs/PROJECT_CONTEXT.md - Added Phase 5 to changelog and links
+- docs/SESSION_NOTES.md - This session entry (Phase 5 planning)
+
+### Outcomes / Decisions
+- Phase 5 specification complete and ready for review by user
+- Architecture decision: Modular service classes for each calculator, enforcing separation of concerns
+- Data model decision: TaxLiability records store full calculation breakdown for transparency and auditability
+- Strategy decision: Auto-calculations are suggestions users can override before export (not locked)
+- Phasing strategy: 5 sub-phases from basic (5a) to advanced reliefs (5e), Phase 5a is MVP for employment-only users
+- Next step: Await user approval/feedback on Phase 5 specification before beginning Phase 5a implementation
+
+---
+
+### 2026-01-05 (Session 1 - Phase 4 Completion)
 
 **Participants:** User, Claude Code Agent
 **Branch:** main

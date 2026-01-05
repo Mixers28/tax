@@ -7,7 +7,8 @@
 **Summary (auto-maintained by Agent):**
 - Local-first web app for UK Self Assessment 2024-25 using HMRC paper forms as the canonical schema.
 - Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
-- Phase 4 complete: PDF/JSON export generation with UTF-8 character encoding for international documents.
+- Phase 4 complete: PDF/JSON export generation with UTF-8 character encoding.
+- Phase 5 spec created: Full tax calculation engine (income aggregation, tax liability, NI) - Phase 5a onwards.
 <!-- SUMMARY_END -->
 
 ---
@@ -56,8 +57,10 @@
 ## 5. Links & Related Docs
 
 - Roadmap: docs/NOW.md
-- Design docs: docs/spec.md, docs/AGENT_SESSION_PROTOCOL.md
+- Design docs: docs/spec.md, docs/PHASE_5_SPEC.md, docs/AGENT_SESSION_PROTOCOL.md
 - References: docs/references/sa-forms-2025-redacted.pdf, docs/references/sa-forms-2025-boxes-first-pass.md
+- Forms: docs/references/Blank Tax Return (2025) - SA100-2025.pdf, docs/references/Blank Employment (2025) - SA102_2025.pdf
+- Analysis: docs/SPEC_DRIFT_ANALYSIS.md
 - Product / UX docs: docs/PROJECT_CONTEXT.md, docs/NOW.md
 
 ---
@@ -66,6 +69,7 @@
 
 Use this section for **big decisions** only:
 
+- `2026-01-05` – Phase 5 specification created: Full UK tax calculation engine with 5 sub-phases (5a: basic income/tax/NI → 5e: advanced reliefs). Phase 5a targets employment income aggregation, Personal Allowance, tax bands (20%/40%/45%), and Class 1 NI. Modular service architecture with TaxLiability/IncomeSource/TaxCalculationBreakdown models for transparency and auditability.
 - `2026-01-05` – Phase 4 export feature complete. PDF/JSON exports now support UTF-8 character encoding with sanitization for German/international documents. Text sanitization wrapper handles non-ASCII characters (ü→u, ö→o, ä→a, etc.) for Prawn PDF compatibility.
 - `2026-01-03` – Phase 3 extraction pipeline complete. Ollama (gemma3:1b) integration for offline PDF text extraction and candidate box value suggestions.
 - `2026-01-01` – Chose Rails + Hotwire and Docker Compose for MVP; no external calls by default.
