@@ -9,7 +9,7 @@
 - Rails + SQLite + Docker Compose, no external calls, data encrypted at rest.
 - Phase 4 complete: PDF/JSON export generation with UTF-8 character encoding.
 - Phase 5 spec complete: Full tax calculation engine design (5 sub-phases).
-- Phase 5a/5b/5c complete: Unified tax relief calculator operational. All Phase 5a-5c features integrated: employment income, pension relief, gift aid, blind allowance, furnished property relief, HICBC, Class 2/4 NI.
+- Phase 5a/5b/5c/5d complete: Unified tax relief calculator operational. All Phase 5a-5d features integrated: employment income, pension relief, gift aid, blind allowance, furnished property relief, HICBC, Class 2/4 NI, trading allowance, marriage allowance, married couple's allowance.
 <!-- SUMMARY_END -->
 
 ---
@@ -50,11 +50,12 @@
 
 - Box registry (Form/Page/Box definitions) drives UI and export.
 - Box values are stored per return, with evidence links and audit trail.
-- Unified tax calculation engine (Phase 5a/5b/5c):
-  - **TaxCalculations:: namespace** for automatic calculations (IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, NationalInsuranceCalculator, PensionReliefCalculator, GiftAidCalculator, FurnishedPropertyCalculator, HighIncomeChildBenefitCalculator)
-  - **TaxLiabilityOrchestrator** orchestrates all calculators in sequence for employment, rental, pension, gift aid, and self-employment income
+- Unified tax calculation engine (Phase 5a/5b/5c/5d):
+  - **TaxCalculations:: namespace** for automatic calculations (IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, NationalInsuranceCalculator, PensionReliefCalculator, GiftAidCalculator, FurnishedPropertyCalculator, HighIncomeChildBenefitCalculator, TradingAllowanceCalculator, MarriageAllowanceCalculator, MarriedCouplesAllowanceCalculator)
+  - **TaxLiabilityOrchestrator** orchestrates all calculators in sequence for employment, rental, pension, gift aid, self-employment, and advanced relief income
   - **Calculators:: namespace** for form box validation and export value preparation only
-- Exporter generates "Copy to HMRC" worksheet (PDF + JSON) with full tax calculation summaries including all reliefs.
+  - **Phase 5d UI pattern**: Relief cards with simple toggle/checkbox controls; conditional form visibility via JavaScript
+- Exporter generates "Copy to HMRC" worksheet (PDF + JSON) with full tax calculation summaries including all Phase 5a-5d reliefs.
 
 ---
 
@@ -74,6 +75,7 @@
 
 Use this section for **big decisions** only:
 
+- `2026-01-06` – **Phase 5d complete:** Implemented three advanced UK tax reliefs: Trading Allowance (£1,000 simplified expenses), Marriage Allowance (£1,260 PA transfer between spouses), and Married Couple's Allowance (up to £1,108 tax relief). Created three new calculators (TradingAllowanceCalculator, MarriageAllowanceCalculator, MarriedCouplesAllowanceCalculator) integrated into TaxLiabilityOrchestrator. Added relief cards to Tax Reliefs UI with toggle/checkbox controls and conditional form visibility via JavaScript. Enforced mutual exclusivity between Marriage Allowance and MCA at model validation level. All Phase 5a-5d features seamlessly integrated into unified export with full calculation breakdowns.
 - `2026-01-06` – **Phase 5b & 5c unified:** Integrated all tax relief calculators into TaxLiabilityOrchestrator. Created PensionReliefCalculator (£80→£100 gross-up, £60k annual allowance), GiftAidCalculator (band extension), FurnishedPropertyCalculator (50% FTCR), HighIncomeChildBenefitCalculator (1% charge above £60k). Extended NationalInsuranceCalculator with Class 2 (£163.80) and Class 4 (8%/2% tiered) NI. All Phase 5a-5c features now automatically integrated and seamless. Removed redundant Calculations UI tab.
 - `2026-01-06` – **Currency support completed:** Implemented Option B (cached exchange rates). EUR/USD income now converts to GBP at form submission. ExchangeRateConfig reads rates from docker-compose.yml environment variables (EUR_TO_GBP_RATE: 0.8650, USD_TO_GBP_RATE: 1.2850). Exchange rate stored in database for audit trail. All amounts normalized to GBP for calculation consistency. Zero external API calls - maintains local-first design. Users can override rates on form if needed.
 - `2026-01-06` – **PDF export symbol fix:** Fixed currency symbol rendering in PDF exports (£€$¥₹). Updated sanitize_text regex to preserve currency symbols while still converting problematic non-ASCII characters. Exports now show "£42,896" instead of "?42,896".

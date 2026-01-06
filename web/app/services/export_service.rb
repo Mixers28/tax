@@ -131,6 +131,16 @@ class ExportService
             { label: "Class 4 NI", value: liability.class_4_ni },
             { label: "Total NI", value: liability.total_ni },
             { label: "High Income Child Benefit Charge", value: liability.hicbc_charge },
+            # Phase 5d: Trading Allowance
+            { label: "Trading Income (Gross)", value: liability.trading_income_gross },
+            { label: "Trading Allowance", value: liability.trading_allowance_amount },
+            { label: "Trading Income (Net)", value: liability.trading_income_net },
+            # Phase 5d: Marriage Allowance
+            { label: "Marriage Allowance Transfer", value: liability.marriage_allowance_transfer_amount },
+            { label: "Marriage Allowance Tax Reduction", value: liability.marriage_allowance_tax_reduction },
+            # Phase 5d: Married Couple's Allowance
+            { label: "Married Couple's Allowance", value: liability.married_couples_allowance_amount },
+            { label: "MCA Tax Relief (10%)", value: liability.married_couples_allowance_relief },
             { label: "Total Tax & NI", value: liability.total_tax_and_ni },
             { label: "Tax Paid at Source", value: liability.tax_paid_at_source },
             { label: "Net Liability", value: liability.net_liability }

@@ -31,6 +31,11 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :encrypted_local
 
+  # Active Record Encryption Configuration (Phase 5d+)
+  # Keys are loaded from config/credentials/development.yml.enc
+  config.active_record.encryption.support_unencrypted_data = true
+  config.active_record.encryption.extend_queries = true
+
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 

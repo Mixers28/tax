@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_06_022312) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -267,6 +267,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_022312) do
     t.decimal "hicbc_charge", precision: 12, scale: 2, default: "0.0"
     t.decimal "hicbc_threshold_income", precision: 12, scale: 2, default: "0.0"
     t.decimal "higher_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "marriage_allowance_tax_reduction", precision: 12, scale: 2, default: "0.0"
+    t.decimal "marriage_allowance_transfer_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "married_couples_allowance_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "married_couples_allowance_relief", precision: 12, scale: 2, default: "0.0"
     t.decimal "net_liability", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "pension_contributions_gross", precision: 12, scale: 2, default: "0.0"
     t.decimal "pension_relief_at_source", precision: 12, scale: 2, default: "0.0"
@@ -281,18 +285,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_022312) do
     t.decimal "total_income_tax", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "total_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "total_tax_and_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "trading_allowance_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "trading_income_gross", precision: 12, scale: 2, default: "0.0"
+    t.decimal "trading_income_net", precision: 12, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
     t.index ["tax_return_id"], name: "index_tax_liabilities_on_tax_return_id", unique: true
   end
 
   create_table "tax_returns", force: :cascade do |t|
+    t.boolean "claims_marriage_allowance", default: false, null: false
+    t.boolean "claims_married_couples_allowance", default: false, null: false
     t.datetime "created_at", null: false
     t.string "enabled_calculators", default: "gift_aid,hicbc"
     t.boolean "is_blind_person", default: false, null: false
+    t.string "marriage_allowance_role"
+    t.date "spouse_dob"
+    t.decimal "spouse_income", precision: 12, scale: 2, default: "0.0"
     t.string "status", default: "draft", null: false
     t.integer "tax_year_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.boolean "uses_trading_allowance", default: false, null: false
     t.index ["enabled_calculators"], name: "index_tax_returns_on_enabled_calculators"
     t.index ["is_blind_person"], name: "index_tax_returns_on_is_blind_person"
     t.index ["tax_year_id"], name: "index_tax_returns_on_tax_year_id"

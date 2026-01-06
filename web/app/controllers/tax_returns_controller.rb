@@ -31,9 +31,41 @@ class TaxReturnsController < ApplicationController
     redirect_to tax_return_path(@tax_return), notice: "Blind Person status updated."
   end
 
+  # Phase 5d: Toggle Trading Allowance
+  def toggle_trading_allowance
+    @tax_return.update!(uses_trading_allowance: !@tax_return.uses_trading_allowance)
+    redirect_to tax_return_path(@tax_return), notice: "Trading Allowance #{@tax_return.uses_trading_allowance ? 'enabled' : 'disabled'}."
+  end
+
+  # Phase 5d: Update Marriage Allowance
+  def update_marriage_allowance
+    if @tax_return.update(marriage_allowance_params)
+      redirect_to tax_return_path(@tax_return), notice: "Marriage Allowance updated."
+    else
+      redirect_to tax_return_path(@tax_return), alert: "Error: #{@tax_return.errors.full_messages.join(', ')}"
+    end
+  end
+
+  # Phase 5d: Update Married Couple's Allowance
+  def update_married_couples_allowance
+    if @tax_return.update(married_couples_allowance_params)
+      redirect_to tax_return_path(@tax_return), notice: "Married Couple's Allowance updated."
+    else
+      redirect_to tax_return_path(@tax_return), alert: "Error: #{@tax_return.errors.full_messages.join(', ')}"
+    end
+  end
+
   private
 
   def set_tax_return
     @tax_return = current_user.tax_returns.find(params[:id])
+  end
+
+  def marriage_allowance_params
+    params.require(:tax_return).permit(:claims_marriage_allowance, :marriage_allowance_role)
+  end
+
+  def married_couples_allowance_params
+    params.require(:tax_return).permit(:claims_married_couples_allowance, :spouse_dob)
   end
 end

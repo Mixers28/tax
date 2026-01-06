@@ -41,6 +41,16 @@ class TaxLiability < ApplicationRecord
       self_employment_income: self_employment_income,
       hicbc_threshold_income: hicbc_threshold_income,
       hicbc_charge: hicbc_charge,
+      # Phase 5d: Trading Allowance
+      trading_income_gross: trading_income_gross,
+      trading_allowance_amount: trading_allowance_amount,
+      trading_income_net: trading_income_net,
+      # Phase 5d: Marriage Allowance
+      marriage_allowance_transfer_amount: marriage_allowance_transfer_amount,
+      marriage_allowance_tax_reduction: marriage_allowance_tax_reduction,
+      # Phase 5d: Married Couple's Allowance
+      married_couples_allowance_amount: married_couples_allowance_amount,
+      married_couples_allowance_relief: married_couples_allowance_relief,
       taxable_income: taxable_income,
       total_income_tax: total_income_tax,
       class_1_ni: class_1_ni,

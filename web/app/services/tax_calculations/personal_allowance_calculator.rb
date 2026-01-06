@@ -15,7 +15,15 @@ module TaxCalculations
     def calculate(gross_income)
       base_pa = base_allowance
       blind_allowance = @tax_return.is_blind_person ? @tax_band.blind_persons_allowance : 0
-      total_pa = base_pa + blind_allowance
+
+      # Phase 5d: Marriage Allowance adjustment
+      marriage_allowance_adj = 0
+      if @tax_return.claims_marriage_allowance
+        ma_calc = MarriageAllowanceCalculator.new(@tax_return).calculate
+        marriage_allowance_adj = ma_calc[:pa_adjustment]
+      end
+
+      total_pa = base_pa + blind_allowance + marriage_allowance_adj
 
       # Phase 5a: Withdraw PA if income > £125,140
       if gross_income > PA_WITHDRAWAL_THRESHOLD
@@ -30,14 +38,15 @@ module TaxCalculations
           gross_income: gross_income,
           base_pa: base_pa,
           blind_allowance: blind_allowance,
-          total_pa_before_withdrawal: base_pa + blind_allowance,
+          marriage_allowance_adj: marriage_allowance_adj,
+          total_pa_before_withdrawal: base_pa + blind_allowance + marriage_allowance_adj,
           withdrawal_threshold: PA_WITHDRAWAL_THRESHOLD
         },
         total_pa,
-        "Personal Allowance: £#{format('%.2f', base_pa)} + Blind £#{format('%.2f', blind_allowance)} = £#{format('%.2f', total_pa)}"
+        "Personal Allowance: £#{format('%.2f', base_pa)} + Blind £#{format('%.2f', blind_allowance)} + MA £#{format('%.2f', marriage_allowance_adj)} = £#{format('%.2f', total_pa)}"
       )
 
-      { base_pa: base_pa, blind_allowance: blind_allowance, total_pa: total_pa }
+      { base_pa: base_pa, blind_allowance: blind_allowance, marriage_allowance_adj: marriage_allowance_adj, total_pa: total_pa }
     end
 
     private

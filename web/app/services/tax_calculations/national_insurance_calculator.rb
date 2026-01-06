@@ -2,6 +2,16 @@
 
 module TaxCalculations
   class NationalInsuranceCalculator
+    # Class 2 NI Constants
+    CLASS_2_NI_FIXED = 163.80
+    CLASS_2_NI_THRESHOLD = 6_725.00
+
+    # Class 4 NI Constants
+    CLASS_4_LOWER_THRESHOLD = 12_570.00
+    CLASS_4_UPPER_THRESHOLD = 50_270.00
+    CLASS_4_BASIC_RATE = 0.08
+    CLASS_4_HIGHER_RATE = 0.02
+
     def initialize(tax_return)
       @tax_return = tax_return
       @tax_band = TaxBand.for_tax_year(2024)
@@ -47,9 +57,6 @@ module TaxCalculations
       # 2024-25: Fixed £163.80 per year if profit > £6,725 (threshold)
       # £0 if profit ≤ £6,725
 
-      CLASS_2_NI_FIXED = 163.80
-      CLASS_2_NI_THRESHOLD = 6_725.00
-
       class_2_ni = self_employment_income > CLASS_2_NI_THRESHOLD ? CLASS_2_NI_FIXED : 0
 
       TaxCalculationBreakdown.record_step(
@@ -70,11 +77,6 @@ module TaxCalculations
       # Class 4 National Insurance (self-employed)
       # 2024-25: 8% on £12,571-£50,270, then 2% above
       # £0 if profit ≤ £12,570
-
-      CLASS_4_LOWER_THRESHOLD = 12_570.00
-      CLASS_4_UPPER_THRESHOLD = 50_270.00
-      CLASS_4_BASIC_RATE = 0.08
-      CLASS_4_HIGHER_RATE = 0.02
 
       return zero_class_4_result if profit <= CLASS_4_LOWER_THRESHOLD
 

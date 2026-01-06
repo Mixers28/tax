@@ -20,6 +20,11 @@ class TaxReturn < ApplicationRecord
   validates :status, presence: true
   validates :is_blind_person, inclusion: { in: [true, false] }
 
+  # Phase 5d: Tax Reliefs validations
+  validates :marriage_allowance_role, inclusion: { in: %w[transferor transferee], allow_nil: true }
+  validates :marriage_allowance_role, presence: true, if: :claims_marriage_allowance
+  validate :cannot_claim_both_marriage_and_mca
+
   def calculator_enabled?(calculator_code)
     enabled_calculators_list.include?(calculator_code.to_s)
   end
@@ -47,5 +52,13 @@ class TaxReturn < ApplicationRecord
 
   def disable_calculator(calculator_code)
     toggle_calculator(calculator_code, false)
+  end
+
+  private
+
+  def cannot_claim_both_marriage_and_mca
+    if claims_marriage_allowance && claims_married_couples_allowance
+      errors.add(:base, "Cannot claim both Marriage Allowance and Married Couple's Allowance")
+    end
   end
 end

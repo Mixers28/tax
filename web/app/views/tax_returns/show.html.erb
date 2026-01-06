@@ -196,6 +196,94 @@
                 <%= link_to "Manage Donations", tax_return_gift_aid_donations_path(@tax_return), class: "btn btn-primary btn-sm" %>
               </div>
             </div>
+
+            <!-- Trading Allowance (Phase 5d) -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>📊 Trading Allowance</h3>
+                <p class="relief-amount"><%= @tax_return.uses_trading_allowance ? "£1,000" : "—" %></p>
+              </div>
+              <p class="relief-description">£1,000 simplified expenses deduction for self-employed or miscellaneous trading income. Useful if your actual expenses are less than £1,000.</p>
+              <div class="relief-status">
+                <% if @tax_return.uses_trading_allowance %>
+                  <span class="status-badge status-active">✓ Enabled</span>
+                <% else %>
+                  <span class="status-badge status-inactive">✗ Not claimed</span>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= form_with url: toggle_trading_allowance_tax_return_path(@tax_return), method: :patch, local: true, style: "display: inline;" do %>
+                  <% if @tax_return.uses_trading_allowance %>
+                    <%= submit_tag "Disable Trading Allowance", class: "btn btn-secondary btn-sm" %>
+                  <% else %>
+                    <%= submit_tag "Enable Trading Allowance", class: "btn btn-primary btn-sm" %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Marriage Allowance (Phase 5d) -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>💑 Marriage Allowance</h3>
+                <p class="relief-amount"><%= @tax_return.claims_marriage_allowance ? "£1,260" : "—" %></p>
+              </div>
+              <p class="relief-description">Transfer 10% of your Personal Allowance (£1,260) to your spouse if you don't use your full allowance. Tax saving: £252 for your spouse.</p>
+              <div class="relief-status">
+                <% if @tax_return.claims_marriage_allowance %>
+                  <span class="status-badge status-active">✓ Claimed (<%= @tax_return.marriage_allowance_role&.titleize %>) </span>
+                <% else %>
+                  <span class="status-badge status-inactive">✗ Not claimed</span>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= form_with model: @tax_return, url: update_marriage_allowance_tax_return_path(@tax_return), method: :patch, local: true do |f| %>
+                  <div class="relief-form-row">
+                    <div class="relief-checkbox">
+                      <%= f.check_box :claims_marriage_allowance, { id: "marriage_allowance_toggle" }, "true", "false" %>
+                      <%= f.label :claims_marriage_allowance, "Claim Marriage Allowance", class: "relief-checkbox-label" %>
+                    </div>
+                    <div id="marriage_allowance_role" class="relief-fields" style="<%= 'display:none;' unless @tax_return.claims_marriage_allowance %>">
+                      <%= f.label :marriage_allowance_role, "I am the:", class: "relief-field-label" %>
+                      <%= f.select :marriage_allowance_role, [['Transferor (giving allowance)', 'transferor'], ['Transferee (receiving allowance)', 'transferee']], { include_blank: 'Select your role' }, class: "relief-select" %>
+                    </div>
+                  </div>
+                  <%= f.submit "Save", class: "btn btn-primary btn-sm", style: "margin-top: 0.5rem;" %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Married Couple's Allowance (Phase 5d) -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>👫 Married Couple's Allowance</h3>
+                <p class="relief-amount">Up to £1,108</p>
+              </div>
+              <p class="relief-description">10% tax relief on up to £11,080 of allowance. Available if one spouse was born before 6 April 1935 (age 90+) and you're not claiming Marriage Allowance.</p>
+              <div class="relief-status">
+                <% if @tax_return.claims_married_couples_allowance %>
+                  <span class="status-badge status-active">✓ Enabled</span>
+                <% else %>
+                  <span class="status-badge status-inactive">✗ Not claimed</span>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= form_with model: @tax_return, url: update_married_couples_allowance_tax_return_path(@tax_return), method: :patch, local: true do |f| %>
+                  <div class="relief-form-row">
+                    <div class="relief-checkbox">
+                      <%= f.check_box :claims_married_couples_allowance, { id: "mca_toggle" }, "true", "false" %>
+                      <%= f.label :claims_married_couples_allowance, "Claim Married Couple's Allowance", class: "relief-checkbox-label" %>
+                    </div>
+                    <div id="mca_details" class="relief-fields" style="<%= 'display:none;' unless @tax_return.claims_married_couples_allowance %>">
+                      <%= f.label :spouse_dob, "Spouse date of birth:", class: "relief-field-label" %>
+                      <%= f.date_field :spouse_dob, class: "relief-date-input", placeholder: "dd/mm/yyyy" %>
+                      <p class="relief-field-hint">Used to verify age eligibility (born before 6 April 1935)</p>
+                    </div>
+                  </div>
+                  <%= f.submit "Save", class: "btn btn-primary btn-sm", style: "margin-top: 0.5rem;" %>
+                <% end %>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -786,6 +874,73 @@
     font-size: 0.85rem;
   }
 
+  .relief-form-row {
+    margin-bottom: 1rem;
+  }
+
+  .relief-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .relief-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+  }
+
+  .relief-checkbox-label {
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+  }
+
+  .relief-fields {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .relief-field-label {
+    display: block;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .relief-select,
+  .relief-date-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: white;
+    margin-bottom: 0.5rem;
+  }
+
+  .relief-select:focus,
+  .relief-date-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .relief-field-hint {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
+  }
+
   @media (max-width: 768px) {
     .tabs {
       flex-wrap: wrap;
@@ -843,4 +998,30 @@
       this.classList.add('active');
     });
   });
+
+  // Phase 5d Relief Toggle Handlers
+
+  // Marriage Allowance toggle
+  const marriageAllowanceToggle = document.getElementById('marriage_allowance_toggle');
+  const marriageAllowanceRole = document.getElementById('marriage_allowance_role');
+
+  if (marriageAllowanceToggle) {
+    marriageAllowanceToggle.addEventListener('change', function() {
+      if (marriageAllowanceRole) {
+        marriageAllowanceRole.style.display = this.checked ? 'block' : 'none';
+      }
+    });
+  }
+
+  // Married Couple's Allowance toggle
+  const mcaToggle = document.getElementById('mca_toggle');
+  const mcaDetails = document.getElementById('mca_details');
+
+  if (mcaToggle) {
+    mcaToggle.addEventListener('change', function() {
+      if (mcaDetails) {
+        mcaDetails.style.display = this.checked ? 'block' : 'none';
+      }
+    });
+  }
 </script>

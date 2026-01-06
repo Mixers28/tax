@@ -69,8 +69,21 @@ module TaxCalculations
       furnished_relief = ftcr_result[:ftcr_relief]
 
       # High Income Child Benefit Charge (HICBC)
-      hicbc_result = HighIncomeChildBenefitCalculator.new(@tax_return).calculate(gross_income)
+      hicbc_result = HighIncomeChildBenefitCalculator.new(@tax_return).calculate
       hicbc_charge = hicbc_result[:hicbc_charge]
+
+      # Phase 5d: Trading Allowance
+      trading_result = TradingAllowanceCalculator.new(@tax_return).calculate
+
+      # Phase 5d: Marriage Allowance (already integrated in PA calculator, but get standalone result)
+      marriage_allowance_result = MarriageAllowanceCalculator.new(@tax_return).calculate
+
+      # Phase 5d: Married Couple's Allowance (applied as tax credit)
+      mca_result = MarriedCouplesAllowanceCalculator.new(@tax_return).calculate
+      mca_relief = mca_result[:relief_amount]
+
+      # Calculate final tax after MCA relief
+      final_income_tax = [tax_result[:total_income_tax] - mca_relief, 0].max
 
       # Create or update TaxLiability record
       liability = TaxLiability.for_return(@tax_return)
@@ -89,11 +102,21 @@ module TaxCalculations
         self_employment_income: self_employment_income,
         hicbc_threshold_income: hicbc_result[:net_income],
         hicbc_charge: hicbc_charge,
+        # Phase 5d: Trading Allowance
+        trading_income_gross: trading_result[:trading_income_gross],
+        trading_allowance_amount: trading_result[:trading_allowance_amount],
+        trading_income_net: trading_result[:trading_income_net],
+        # Phase 5d: Marriage Allowance
+        marriage_allowance_transfer_amount: marriage_allowance_result[:transfer_amount],
+        marriage_allowance_tax_reduction: marriage_allowance_result[:tax_reduction],
+        # Phase 5d: Married Couple's Allowance
+        married_couples_allowance_amount: mca_result[:allowance_amount],
+        married_couples_allowance_relief: mca_result[:relief_amount],
         taxable_income: taxable_income,
         basic_rate_tax: tax_result[:basic_rate_tax],
         higher_rate_tax: tax_result[:higher_rate_tax],
         additional_rate_tax: tax_result[:additional_rate_tax],
-        total_income_tax: tax_result[:total_income_tax],
+        total_income_tax: final_income_tax,
         class_1_ni: class_1_ni,
         class_2_ni: class_2_ni,
         class_4_ni: class_4_ni,

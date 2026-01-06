@@ -24,6 +24,10 @@ Rails.application.routes.draw do
     member do
       patch :update_calculator_settings
       patch :toggle_blind_person
+      # Phase 5d: Tax Reliefs
+      patch :toggle_trading_allowance
+      patch :update_marriage_allowance
+      patch :update_married_couples_allowance
     end
 
     resources :income_sources, only: [:index, :new, :create, :edit, :update, :destroy]

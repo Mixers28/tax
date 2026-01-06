@@ -35,7 +35,64 @@
 ---
 
 ## Session Template (Copy/Paste for each new session)
+
 ## Recent Sessions (last 3-5)
+
+### 2026-01-06 (Session 5 - Phase 5d Complete: Advanced Tax Reliefs)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 5d: Advanced Tax Reliefs - Complete Implementation**
+  - Implemented three new UK tax reliefs: Trading Allowance (£1,000 simplified expenses), Marriage Allowance (£1,260 PA transfer), and Married Couple's Allowance (up to £1,108 tax relief)
+  - Created TradingAllowanceCalculator: Calculates lesser of £1,000 or actual self-employment income
+  - Created MarriageAllowanceCalculator: Supports transferor/transferee roles with £1,260 PA adjustment and £252 tax reduction for transferee
+  - Created MarriedCouplesAllowanceCalculator: Age eligibility check (born before 6 April 1935), income taper (£1 reduction per £2 over £37,000), minimum £4,280 allowance, 10% relief rate
+  - Extended PersonalAllowanceCalculator: Added Marriage Allowance PA adjustment integration
+  - Updated TaxLiabilityOrchestrator: Integrated all three Phase 5d calculators in sequence, applies MCA relief as tax credit
+  - Database migrations: Added 6 new fields to tax_returns table (uses_trading_allowance, claims_marriage_allowance, marriage_allowance_role, claims_married_couples_allowance, spouse_dob, spouse_income) and 6 new fields to tax_liabilities table (trading_income_gross, trading_allowance_amount, trading_income_net, marriage_allowance_transfer_amount, marriage_allowance_tax_reduction, married_couples_allowance_amount, married_couples_allowance_relief)
+  - TaxReturn model validations: Added mutual exclusivity between Marriage Allowance and MCA with custom validator
+  - TaxLiability model: Updated summary() method to include all Phase 5d relief fields
+  - ExportService: Updated calculation_steps to include all Phase 5d calculation breakdowns
+  - Controller actions: Added three new actions to TaxReturnsController (toggle_trading_allowance, update_marriage_allowance, update_married_couples_allowance) with strong parameter methods
+  - Routes: Added three member routes for tax_returns resource (patch :toggle_trading_allowance, patch :update_marriage_allowance, patch :update_married_couples_allowance)
+  - UI Implementation: Added three relief cards to Tax Reliefs tab with emojis (📊 Trading, 💑 Marriage, 👫 MCA), status badges, forms with conditional visibility
+  - JavaScript: Added toggle handlers for Marriage Allowance role selector and MCA spouse DOB field with show/hide behavior
+  - CSS: Added 8 new relief form styling classes (relief-form-row, relief-checkbox, relief-fields, relief-field-label, relief-select, relief-date-input, relief-checkbox-label, relief-field-hint)
+  - Documentation: Updated NOW.md, PROJECT_CONTEXT.md, and SESSION_NOTES.md with Phase 5d completion details
+
+### Files touched
+- web/db/migrate/20260106023000_add_phase_5d_reliefs_to_tax_returns.rb (NEW)
+- web/db/migrate/20260106023001_add_phase_5d_reliefs_to_tax_liabilities.rb (NEW)
+- web/app/services/tax_calculations/trading_allowance_calculator.rb (NEW)
+- web/app/services/tax_calculations/marriage_allowance_calculator.rb (NEW)
+- web/app/services/tax_calculations/married_couples_allowance_calculator.rb (NEW)
+- web/app/services/tax_calculations/personal_allowance_calculator.rb (MODIFIED - added MA adjustment)
+- web/app/services/tax_calculations/tax_liability_orchestrator.rb (MODIFIED - integrated Phase 5d calculators)
+- web/app/models/tax_return.rb (MODIFIED - added Phase 5d validations)
+- web/app/models/tax_liability.rb (MODIFIED - updated summary method)
+- web/app/controllers/tax_returns_controller.rb (MODIFIED - added 3 new actions and strong parameters)
+- web/config/routes.rb (MODIFIED - added 3 member routes)
+- web/app/services/export_service.rb (MODIFIED - added Phase 5d calculation steps)
+- web/app/views/tax_returns/show.html.erb (MODIFIED - added 3 relief cards, CSS, JavaScript)
+- docs/NOW.md (UPDATED)
+- docs/PROJECT_CONTEXT.md (UPDATED)
+- docs/SESSION_NOTES.md (THIS ENTRY)
+
+### Outcomes / Decisions
+- Phase 5d implementation complete: All three advanced tax reliefs fully integrated
+- Architecture consistency: Followed existing Phase 5b/5c patterns (calculator services → orchestrator → TaxLiability model)
+- Non-breaking changes: All Phase 5d functionality is additive; existing Phase 5a-5c logic unchanged
+- UI pattern: Simple toggle/checkbox design with JavaScript conditional visibility (no separate controller/view files needed)
+- Validation strategy: Mutual exclusivity enforced at model level (custom validator prevents both MA and MCA being claimed)
+- Integration: MCA relief applied as negative tax credit (subtracts from total_income_tax)
+- Database safe: All migrations use column_exists? checks for idempotence
+- Documentation updated: All three context files (NOW, PROJECT_CONTEXT, SESSION_NOTES) reflect Phase 5d completion
+- Ready for: Phase 5e (investment income), Phase 6 (multi-year returns), or HMRC filing integration
+- **Note:** Migrations created but not yet run (blocked by Active Record encryption key configuration)
+
+---
 
 ### 2026-01-06 (Session 4 - Phase 5b & 5c Completion)
 
