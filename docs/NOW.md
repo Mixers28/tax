@@ -15,13 +15,15 @@
 
 ## Current Objective
 
-Phase 5a complete: Full implementation of basic employment income tax calculator with:
+Phase 5a **COMPLETE** with currency support and UTF-8 rendering fixes:
 - ✅ Income entry UI (IncomeSourcesController + form views)
 - ✅ Tax calculation pipeline (IncomeAggregator → PA → Tax Bands → NI)
 - ✅ Export integration (TaxLiabilityOrchestrator in ExportService)
 - ✅ Enhanced export views (review preview + detailed show breakdown)
 - ✅ Database operational (4 migrations, 4 models, all tested)
-- Ready to proceed to Phase 5b (Pension Relief) or Phase 5a integration testing
+- ✅ **Currency support:** EUR/USD income with automatic GBP conversion (cached exchange rates)
+- ✅ **Charset fix:** UTF-8 meta tag for proper symbol rendering
+- Next: Phase 5a integration testing or Phase 5b (Pension Relief)
 
 ---
 
@@ -76,6 +78,19 @@ Phase 5a complete: Full implementation of basic employment income tax calculator
 - [x] Export show page: Enhanced liability breakdown by band + NI
 - [x] ExportService integration: TaxLiabilityOrchestrator called during export
 - [x] Routes configured: Nested income_sources under tax_returns
+
+### Currency Support (2026-01-06)
+- [x] Currency fields added to IncomeSource model (currency, exchange_rate columns)
+- [x] ExchangeRateConfig initializer: Environment-based rates (EUR_TO_GBP_RATE, USD_TO_GBP_RATE)
+- [x] Income form: Currency selector, exchange rate input, dynamic currency symbols
+- [x] Auto-conversion: EUR/USD amounts converted to GBP at form submission
+- [x] Audit trail: Exchange rate stored for transparency
+- [x] Docker Compose: Environment variables set (EUR: 0.8650, USD: 1.2850)
+- [x] Zero external calls: All rates cached locally, local-first design preserved
+
+### UTF-8 Rendering (2026-01-06)
+- [x] Charset meta tag: Added `<meta charset="UTF-8">` to application layout
+- [x] Fixed rendering: £ symbol now displays correctly instead of ?
 
 ### Documentation & Testing
 - [x] PHASE_5A_README.md: Complete architecture and usage documentation

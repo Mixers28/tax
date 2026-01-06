@@ -37,6 +37,45 @@
 ## Session Template (Copy/Paste for each new session)
 ## Recent Sessions (last 3-5)
 
+### 2026-01-06 (Session 3 - Currency Support & Charset Fix)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Currency Support Implementation (Option B):** Added multi-currency support for income entry
+  - Created migration: `add_currency_to_income_sources.rb` with currency and exchange_rate columns
+  - Created ExchangeRateConfig initializer reading EUR_TO_GBP_RATE and USD_TO_GBP_RATE from environment
+  - Updated IncomeSourcesController.income_source_params to auto-convert EUR/USD to GBP at form submission
+  - Updated income form with currency selector dropdown, exchange rate input field, dynamic currency symbols
+  - Added JavaScript to show system rate hint and update symbols on currency change
+  - Updated docker-compose.yml with environment variables (EUR: 0.8650, USD: 1.2850)
+  - Exchange rate stored in database for audit trail; all amounts normalized to GBP
+- **Charset Encoding Fix:** Fixed £ symbol rendering in export calculations
+  - Added `<meta charset="UTF-8">` to application.html.erb layout
+  - Resolved issue where currency symbols displayed as ? instead of proper symbols
+
+### Files touched
+- web/db/migrate/20260106012931_add_currency_to_income_sources.rb (NEW)
+- web/config/initializers/exchange_rates.rb (NEW)
+- web/app/controllers/income_sources_controller.rb (MODIFIED - income_source_params)
+- web/app/views/income_sources/_form.html.erb (MODIFIED - currency selector + JS)
+- docker-compose.yml (MODIFIED - added exchange rate variables)
+- web/app/views/layouts/application.html.erb (MODIFIED - added charset meta tag)
+- docs/NOW.md (UPDATED)
+- docs/PROJECT_CONTEXT.md (UPDATED)
+
+### Outcomes / Decisions
+- Currency support complete: Cached exchange rates in environment, zero external API calls
+- Maintains local-first design principle: all rates configured in docker-compose.yml
+- Exchange rate stored per income entry for audit trail and transparency
+- Users can override system rate on form if needed
+- All amounts normalized to GBP in database for calculation consistency
+- Charset fix resolved symbol rendering issue across entire application
+- Ready for Phase 5a integration testing with multi-currency income support
+
+---
+
 ### 2026-01-05 (Session 2 - Phase 5 Planning)
 
 **Participants:** User, Claude Code Agent
