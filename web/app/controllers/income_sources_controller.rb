@@ -50,8 +50,29 @@ class IncomeSourcesController < ApplicationController
   end
 
   def income_source_params
-    params.require(:income_source).permit(
-      :source_type, :amount_gross, :amount_tax_taken, :description
+    source_params = params.require(:income_source).permit(
+      :source_type, :amount_gross, :amount_tax_taken, :description, :currency, :exchange_rate
     )
+
+    # Handle currency conversion if needed
+    if source_params[:currency].present? && source_params[:currency] != 'GBP'
+      # Get exchange rate (from form or from environment)
+      rate = source_params[:exchange_rate].present? ? source_params[:exchange_rate].to_f : ExchangeRateConfig.get_rate(source_params[:currency])
+
+      # Convert amounts to GBP
+      source_params[:amount_gross] = ExchangeRateConfig.convert(source_params[:amount_gross], source_params[:currency])
+      source_params[:amount_tax_taken] = ExchangeRateConfig.convert(source_params[:amount_tax_taken], source_params[:currency])
+
+      # Store the exchange rate used for audit trail
+      source_params[:exchange_rate] = rate
+
+      # After conversion, store as GBP
+      source_params[:currency] = 'GBP'
+    else
+      source_params[:currency] = 'GBP'
+      source_params[:exchange_rate] = 1.0
+    end
+
+    source_params
   end
 end

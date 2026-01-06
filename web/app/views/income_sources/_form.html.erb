@@ -26,17 +26,50 @@
   </div>
 
   <div class="form-group">
-    <%= f.label :amount_gross, "Gross Amount (£)" %>
-    <%= f.number_field :amount_gross, step: 0.01, min: 0,
-                       class: "form-control", required: true,
-                       placeholder: "e.g., 50000.00" %>
+    <%= f.label :currency, "Currency" %>
+    <%= f.select :currency,
+                 ['GBP', 'EUR', 'USD'],
+                 { selected: 'GBP' },
+                 { class: "form-control", id: "income-currency" } %>
+    <small class="text-muted">Select the currency your income is in</small>
+  </div>
+
+  <div class="form-group" id="exchange-rate-group" style="display: none;">
+    <%= f.label :exchange_rate, "Exchange Rate" %>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1;">
+        <%= f.number_field :exchange_rate, step: 0.0001, min: 0,
+                           class: "form-control",
+                           placeholder: "e.g., 0.8650",
+                           id: "income-exchange-rate" %>
+      </div>
+      <div id="exchange-rate-hint" style="padding: 0.75rem; background: #f0f4ff; border-radius: 4px; font-size: 0.875rem; color: #667eea;">
+        <!-- Will be filled by JavaScript -->
+      </div>
+    </div>
+    <small class="text-muted">Leave blank to use system rate. Format: 1 EUR = X GBP</small>
   </div>
 
   <div class="form-group">
-    <%= f.label :amount_tax_taken, "Tax Taken at Source (£)" %>
-    <%= f.number_field :amount_tax_taken, step: 0.01, min: 0, value: 0,
-                       class: "form-control",
-                       placeholder: "e.g., 10000.00" %>
+    <%= f.label :amount_gross, "Gross Amount" %>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <%= f.number_field :amount_gross, step: 0.01, min: 0,
+                         class: "form-control", required: true,
+                         placeholder: "e.g., 50000.00",
+                         id: "income-amount-gross" %>
+      <span id="currency-symbol" style="min-width: 30px;">£</span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :amount_tax_taken, "Tax Taken at Source" %>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <%= f.number_field :amount_tax_taken, step: 0.01, min: 0, value: 0,
+                         class: "form-control",
+                         placeholder: "e.g., 10000.00",
+                         id: "income-amount-tax" %>
+      <span id="currency-symbol-2" style="min-width: 30px;">£</span>
+    </div>
   </div>
 
   <div class="form-group">
@@ -52,3 +85,46 @@
                 class: "btn btn-secondary" %>
   </div>
 <% end %>
+
+<script>
+  // Exchange rate configuration (from environment)
+  const exchangeRates = {
+    'EUR': <%= ENV['EUR_TO_GBP_RATE'] || 0.8650 %>,
+    'USD': <%= ENV['USD_TO_GBP_RATE'] || 1.2850 %>
+  };
+
+  const currencySelect = document.getElementById('income-currency');
+  const exchangeRateGroup = document.getElementById('exchange-rate-group');
+  const currencySymbol = document.getElementById('currency-symbol');
+  const currencySymbol2 = document.getElementById('currency-symbol-2');
+  const exchangeRateInput = document.getElementById('income-exchange-rate');
+  const exchangeRateHint = document.getElementById('exchange-rate-hint');
+
+  function updateCurrencyDisplay() {
+    const currency = currencySelect.value;
+    const symbol = currency === 'GBP' ? '£' : currency;
+
+    // Update symbols
+    currencySymbol.textContent = symbol;
+    currencySymbol2.textContent = symbol;
+
+    // Show/hide exchange rate input
+    if (currency === 'GBP') {
+      exchangeRateGroup.style.display = 'none';
+    } else {
+      exchangeRateGroup.style.display = 'block';
+
+      // Show system rate hint
+      const systemRate = exchangeRates[currency];
+      if (systemRate) {
+        exchangeRateHint.innerHTML = `<strong>System rate:</strong> 1 ${currency} = £${systemRate.toFixed(4)}`;
+        if (!exchangeRateInput.value) {
+          exchangeRateInput.placeholder = `e.g., ${systemRate.toFixed(4)}`;
+        }
+      }
+    }
+  }
+
+  currencySelect.addEventListener('change', updateCurrencyDisplay);
+  updateCurrencyDisplay(); // Initialize on page load
+</script>

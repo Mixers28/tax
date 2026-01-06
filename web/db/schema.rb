@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_05_101000) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -180,7 +180,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_101000) do
     t.decimal "amount_gross", precision: 12, scale: 2, null: false
     t.decimal "amount_tax_taken", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
+    t.string "currency", default: "GBP"
     t.string "description"
+    t.decimal "exchange_rate", precision: 10, scale: 6, default: "1.0"
     t.boolean "is_eligible_for_pa", default: true
     t.boolean "is_eligible_for_relief", default: false
     t.integer "source_type", default: 0, null: false

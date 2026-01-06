@@ -6,6 +6,8 @@ services:
     command: bin/rails server -b 0.0.0.0 -p 3000
     environment:
       RAILS_ENV: development
+      EUR_TO_GBP_RATE: "0.8650"
+      USD_TO_GBP_RATE: "1.2850"
     ports:
       - "3000:3000"
     volumes:
