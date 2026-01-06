@@ -19,7 +19,7 @@ class PDFExportService
         .gsub(/Ö/, 'O')
         .gsub(/Ä/, 'A')
         .gsub(/ß/, 'ss')
-        .gsub(/[^\x00-\x7F]/, '?') # Replace other non-ASCII with ?
+        .gsub(/[^\x00-\x7F£€$¥₹]/, '?') # Replace other non-ASCII with ? but keep currency symbols
   end
 
   def generate
