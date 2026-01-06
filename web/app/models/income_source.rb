@@ -7,7 +7,9 @@ class IncomeSource < ApplicationRecord
     dividends: 2,
     interest: 3,
     pension: 4,
-    other: 5
+    other: 5,
+    pension_contribution: 6,
+    gift_aid_donation: 7
   }
 
   validates :tax_return, :source_type, :amount_gross, presence: true
@@ -19,6 +21,8 @@ class IncomeSource < ApplicationRecord
   scope :interest, -> { where(source_type: :interest) }
   scope :eligible_for_pa, -> { where(is_eligible_for_pa: true) }
   scope :eligible_for_relief, -> { where(is_eligible_for_relief: true) }
+  scope :pension_contributions, -> { where(source_type: :pension_contribution) }
+  scope :gift_aid_donations, -> { where(source_type: :gift_aid_donation) }
 
   # Total gross income from all sources
   def self.total_gross(tax_return)

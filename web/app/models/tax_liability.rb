@@ -28,6 +28,14 @@ class TaxLiability < ApplicationRecord
   def summary
     {
       total_gross_income: total_gross_income,
+      personal_allowance_base: personal_allowance_base,
+      blind_persons_allowance: blind_persons_allowance,
+      personal_allowance_total: personal_allowance_total,
+      pension_contributions_gross: pension_contributions_gross,
+      pension_relief_at_source: pension_relief_at_source,
+      gift_aid_donations_net: gift_aid_donations_net,
+      gift_aid_gross_up: gift_aid_gross_up,
+      gift_aid_extended_band: gift_aid_extended_band,
       taxable_income: taxable_income,
       total_income_tax: total_income_tax,
       total_ni: total_ni,

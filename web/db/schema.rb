@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_06_015646) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -206,6 +206,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
     t.decimal "additional_rate_percentage", precision: 5, scale: 2, null: false
     t.decimal "basic_rate_limit", precision: 12, scale: 2, null: false
     t.decimal "basic_rate_percentage", precision: 5, scale: 2, null: false
+    t.decimal "blind_persons_allowance", precision: 12, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.decimal "higher_rate_limit", precision: 12, scale: 2, null: false
     t.decimal "higher_rate_percentage", precision: 5, scale: 2, null: false
@@ -251,6 +252,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
   create_table "tax_liabilities", force: :cascade do |t|
     t.decimal "additional_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "basic_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "blind_persons_allowance", precision: 12, scale: 2, default: "0.0"
     t.datetime "calculated_at"
     t.string "calculated_by", default: "user_input"
     t.json "calculation_inputs", default: {}
@@ -258,8 +260,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
     t.decimal "class_2_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "class_4_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
+    t.decimal "gift_aid_donations_net", precision: 12, scale: 2, default: "0.0"
+    t.decimal "gift_aid_extended_band", precision: 12, scale: 2, default: "0.0"
+    t.decimal "gift_aid_gross_up", precision: 12, scale: 2, default: "0.0"
     t.decimal "higher_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "net_liability", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "pension_contributions_gross", precision: 12, scale: 2, default: "0.0"
+    t.decimal "pension_relief_at_source", precision: 12, scale: 2, default: "0.0"
+    t.decimal "personal_allowance_base", precision: 12, scale: 2, default: "0.0"
+    t.decimal "personal_allowance_total", precision: 12, scale: 2, default: "0.0"
     t.decimal "tax_paid_at_source", precision: 12, scale: 2, default: "0.0", null: false
     t.integer "tax_return_id", null: false
     t.decimal "taxable_income", precision: 12, scale: 2, default: "0.0", null: false
@@ -274,11 +283,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_012931) do
   create_table "tax_returns", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "enabled_calculators", default: "gift_aid,hicbc"
+    t.boolean "is_blind_person", default: false, null: false
     t.string "status", default: "draft", null: false
     t.integer "tax_year_id", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.index ["enabled_calculators"], name: "index_tax_returns_on_enabled_calculators"
+    t.index ["is_blind_person"], name: "index_tax_returns_on_is_blind_person"
     t.index ["tax_year_id"], name: "index_tax_returns_on_tax_year_id"
     t.index ["user_id"], name: "index_tax_returns_on_user_id"
   end

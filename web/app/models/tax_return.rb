@@ -18,6 +18,7 @@ class TaxReturn < ApplicationRecord
   has_many :tax_calculation_breakdowns, dependent: :destroy
 
   validates :status, presence: true
+  validates :is_blind_person, inclusion: { in: [true, false] }
 
   def calculator_enabled?(calculator_code)
     enabled_calculators_list.include?(calculator_code.to_s)
