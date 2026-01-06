@@ -5,15 +5,38 @@ RSpec.describe TaxCalculations::PersonalAllowanceCalculator do
   let(:calculator) { described_class.new(tax_return) }
 
   describe '#calculate' do
-    context 'standard personal allowance' do
-      it 'returns £12,570 for income under withdrawal threshold' do
-        pa = calculator.calculate(50_000)
-        expect(pa).to eq(12_570.00)
+    context 'standard personal allowance without blind allowance' do
+      it 'returns hash with base PA £12,570 for income under withdrawal threshold' do
+        result = calculator.calculate(50_000)
+        expect(result).to be_a(Hash)
+        expect(result[:base_pa]).to eq(12_570.00)
+        expect(result[:blind_allowance]).to eq(0)
+        expect(result[:total_pa]).to eq(12_570.00)
       end
 
-      it 'returns £12,570 for income at withdrawal threshold' do
-        pa = calculator.calculate(125_140)
-        expect(pa).to eq(12_570.00)
+      it 'returns hash with base PA £12,570 for income at withdrawal threshold' do
+        result = calculator.calculate(125_140)
+        expect(result[:total_pa]).to eq(12_570.00)
+      end
+    end
+
+    context 'personal allowance with blind persons allowance' do
+      before { tax_return.update!(is_blind_person: true) }
+
+      it 'adds £3,070 blind allowance to base PA' do
+        result = calculator.calculate(50_000)
+        expect(result[:base_pa]).to eq(12_570.00)
+        expect(result[:blind_allowance]).to eq(3_070.00)
+        expect(result[:total_pa]).to eq(15_640.00)
+      end
+
+      it 'applies PA withdrawal to total after adding blind allowance' do
+        # Total PA: £12,570 + £3,070 = £15,640
+        # Income £125,140 + £1,000 = £126,140
+        # Withdrawal: £1,000 * 0.5 = £500
+        # Final PA: £15,640 - £500 = £15,140
+        result = calculator.calculate(126_140)
+        expect(result[:total_pa]).to eq(15_140.00)
       end
     end
 
@@ -22,27 +45,27 @@ RSpec.describe TaxCalculations::PersonalAllowanceCalculator do
         # Income £125,140 + £1,000 = £126,140
         # Withdrawal: £1,000 * 0.5 = £500
         # PA: £12,570 - £500 = £12,070
-        pa = calculator.calculate(126_140)
-        expect(pa).to eq(12_070.00)
+        result = calculator.calculate(126_140)
+        expect(result[:total_pa]).to eq(12_070.00)
       end
 
       it 'reduces PA to zero when income is high enough' do
         # PA withdrawal: (£226,140 - £125,140) * 0.5 = £50,500
         # Since £50,500 > £12,570, PA becomes 0
-        pa = calculator.calculate(226_140)
-        expect(pa).to eq(0)
+        result = calculator.calculate(226_140)
+        expect(result[:total_pa]).to eq(0)
       end
     end
 
     context 'edge cases' do
       it 'handles zero income' do
-        pa = calculator.calculate(0)
-        expect(pa).to eq(12_570.00)
+        result = calculator.calculate(0)
+        expect(result[:total_pa]).to eq(12_570.00)
       end
 
       it 'handles very high income' do
-        pa = calculator.calculate(1_000_000)
-        expect(pa).to eq(0)
+        result = calculator.calculate(1_000_000)
+        expect(result[:total_pa]).to eq(0)
       end
     end
   end

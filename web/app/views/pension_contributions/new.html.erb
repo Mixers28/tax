@@ -1,0 +1,151 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1>Add Pension Contribution</h1>
+    <p class="subtitle">Enter a new pension contribution to claim tax relief</p>
+  </div>
+</div>
+
+<div class="tax-return-container">
+  <div class="breadcrumb">
+    <%= link_to "Tax Returns", tax_returns_path %> /
+    <%= link_to @tax_return.tax_year.label, tax_return_path(@tax_return) %> /
+    <%= link_to "Pension Contributions", tax_return_pension_contributions_path(@tax_return) %> /
+    New
+  </div>
+
+  <%= render 'form', pension_contribution: @pension_contribution %>
+</div>
+
+<style>
+  .page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .page-header .subtitle {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .form-container {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: #999;
+    font-size: 0.875rem;
+  }
+
+  .error-box {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+  }
+
+  .error-box h3 {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .error-box ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+  }
+
+  .btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background-color: #dee2e6;
+  }
+</style>

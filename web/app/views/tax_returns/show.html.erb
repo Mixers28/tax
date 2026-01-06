@@ -14,6 +14,7 @@
       <div class="tabs">
         <a href="#overview" class="tab-button active" data-tab="overview">Overview</a>
         <a href="#income" class="tab-button" data-tab="income">Income</a>
+        <a href="#reliefs" class="tab-button" data-tab="reliefs">Tax Reliefs</a>
         <a href="#evidence" class="tab-button" data-tab="evidence">Evidence</a>
         <a href="#validations" class="tab-button" data-tab="validations">Validations</a>
         <a href="#calculations" class="tab-button" data-tab="calculations">Calculations</a>
@@ -103,6 +104,100 @@
 
           <div class="section-actions">
             <%= link_to "Manage Income Sources", tax_return_income_sources_path(@tax_return), class: "btn btn-primary" %>
+          </div>
+        </div>
+      </div>
+
+      <div id="reliefs" class="tab-content">
+        <div class="section">
+          <h2>🏛️ Tax Reliefs</h2>
+          <p class="section-description">Manage your tax reliefs to reduce your tax liability and increase your tax-free personal allowance.</p>
+
+          <div class="relief-categories">
+            <!-- Blind Person's Allowance -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>Blind Person's Allowance</h3>
+                <p class="relief-amount">£3,070</p>
+              </div>
+              <p class="relief-description">Additional allowance added to your personal allowance if you're registered blind.</p>
+              <div class="relief-status">
+                <% if @tax_return.is_blind_person %>
+                  <span class="status-badge status-active">✓ Enabled</span>
+                <% else %>
+                  <span class="status-badge status-inactive">✗ Not claimed</span>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= form_with url: toggle_blind_person_tax_return_path(@tax_return), method: :patch, local: true, style: "display: inline;" do %>
+                  <% if @tax_return.is_blind_person %>
+                    <%= submit_tag "Disable Blind Allowance", class: "btn btn-secondary btn-sm" %>
+                  <% else %>
+                    <%= submit_tag "Enable Blind Allowance", class: "btn btn-primary btn-sm" %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Pension Contributions -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>Pension Contributions</h3>
+                <p class="relief-amount">
+                  <% contributions = @tax_return.income_sources.pension_contributions.sum(:amount_gross).to_f %>
+                  £<%= number_with_precision(contributions / 0.8, precision: 2) %>
+                </p>
+              </div>
+              <p class="relief-description">Basic rate tax relief on personal pension contributions (25% added by HMRC).</p>
+              <div class="relief-items">
+                <% contributions = @tax_return.income_sources.pension_contributions %>
+                <% if contributions.any? %>
+                  <div class="items-list">
+                    <% contributions.each do |contribution| %>
+                      <div class="item-row">
+                        <span class="item-label"><%= contribution.description.presence || "Pension" %></span>
+                        <span class="item-value">£<%= number_with_precision(contribution.amount_gross / 0.8, precision: 2) %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <p class="relief-empty">No pension contributions added yet</p>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= link_to "Manage Contributions", tax_return_pension_contributions_path(@tax_return), class: "btn btn-primary btn-sm" %>
+              </div>
+            </div>
+
+            <!-- Gift Aid Donations -->
+            <div class="relief-card">
+              <div class="relief-header">
+                <h3>Gift Aid Donations</h3>
+                <p class="relief-amount">
+                  <% donations = @tax_return.income_sources.gift_aid_donations.sum(:amount_gross).to_f %>
+                  £<%= number_with_precision(donations / 0.8, precision: 2) %>
+                </p>
+              </div>
+              <p class="relief-description">Tax relief on charitable donations. Extends your basic rate band for higher/additional rate taxpayers.</p>
+              <div class="relief-items">
+                <% donations = @tax_return.income_sources.gift_aid_donations %>
+                <% if donations.any? %>
+                  <div class="items-list">
+                    <% donations.each do |donation| %>
+                      <div class="item-row">
+                        <span class="item-label"><%= donation.description.presence || "Donation" %></span>
+                        <span class="item-value">£<%= number_with_precision(donation.amount_gross / 0.8, precision: 2) %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <p class="relief-empty">No Gift Aid donations added yet</p>
+                <% end %>
+              </div>
+              <div class="relief-actions">
+                <%= link_to "Manage Donations", tax_return_gift_aid_donations_path(@tax_return), class: "btn btn-primary btn-sm" %>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -568,6 +663,136 @@
   .settings-actions {
     display: flex;
     gap: 1rem;
+  }
+
+  .section-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .relief-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .relief-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #fafbfc;
+    transition: all 0.3s;
+  }
+
+  .relief-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  }
+
+  .relief-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .relief-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .relief-amount {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #667eea;
+    margin: 0;
+  }
+
+  .relief-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+  }
+
+  .relief-status {
+    margin-bottom: 1rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .status-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .relief-items {
+    margin-bottom: 1rem;
+  }
+
+  .items-list {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .item-row:last-child {
+    border-bottom: none;
+  }
+
+  .item-label {
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  .item-value {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .relief-empty {
+    color: #999;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0.75rem;
+  }
+
+  .relief-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 
   @media (max-width: 768px) {

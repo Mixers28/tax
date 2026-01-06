@@ -1,0 +1,109 @@
+<%= form_with model: pension_contribution,
+             url: pension_contribution.persisted? ?
+                  tax_return_pension_contribution_path(@tax_return, pension_contribution) :
+                  tax_return_pension_contributions_path(@tax_return),
+             method: pension_contribution.persisted? ? :patch : :post,
+             local: true, class: "form-container" do |f| %>
+
+  <% if pension_contribution.errors.any? %>
+    <div class="error-box">
+      <h3><%= pluralize(pension_contribution.errors.count, "error") %> prohibited this pension contribution from being saved:</h3>
+      <ul>
+        <% pension_contribution.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :currency, "Currency" %>
+    <%= f.select :currency,
+                 ['GBP', 'EUR', 'USD'],
+                 { selected: 'GBP' },
+                 { class: "form-control", id: "pension-currency" } %>
+    <small class="text-muted">Select the currency your contribution is in</small>
+  </div>
+
+  <div class="form-group" id="exchange-rate-group" style="display: none;">
+    <%= f.label :exchange_rate, "Exchange Rate" %>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1;">
+        <%= f.number_field :exchange_rate, step: 0.0001, min: 0,
+                           class: "form-control",
+                           placeholder: "e.g., 0.8650",
+                           id: "pension-exchange-rate" %>
+      </div>
+      <div id="exchange-rate-hint" style="padding: 0.75rem; background: #f0f4ff; border-radius: 4px; font-size: 0.875rem; color: #667eea;">
+        <!-- Will be filled by JavaScript -->
+      </div>
+    </div>
+    <small class="text-muted">Leave blank to use system rate. Format: 1 EUR = X GBP</small>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :amount_gross, "Net Contribution Amount" %>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <%= f.number_field :amount_gross, step: 0.01, min: 0,
+                         class: "form-control", required: true,
+                         placeholder: "e.g., 4000.00",
+                         id: "pension-amount" %>
+      <span id="currency-symbol" style="min-width: 30px;">£</span>
+    </div>
+    <small class="text-muted">This is your net contribution. Relief at source will be calculated automatically (multiply by 100/80).</small>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :description, "Description (optional)" %>
+    <%= f.text_field :description, class: "form-control",
+                     placeholder: "e.g., Personal pension, ISA, or workplace pension scheme" %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.submit pension_contribution.persisted? ? "Update Pension Contribution" : "Add Pension Contribution",
+                 class: "btn btn-primary" %>
+    <%= link_to "Cancel", tax_return_pension_contributions_path(@tax_return),
+                class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<script>
+  // Exchange rate configuration (from environment)
+  const exchangeRates = {
+    'EUR': <%= ENV['EUR_TO_GBP_RATE'] || 0.8650 %>,
+    'USD': <%= ENV['USD_TO_GBP_RATE'] || 1.2850 %>
+  };
+
+  const currencySelect = document.getElementById('pension-currency');
+  const exchangeRateGroup = document.getElementById('exchange-rate-group');
+  const currencySymbol = document.getElementById('currency-symbol');
+  const exchangeRateInput = document.getElementById('pension-exchange-rate');
+  const exchangeRateHint = document.getElementById('exchange-rate-hint');
+
+  function updateCurrencyDisplay() {
+    const currency = currencySelect.value;
+    const symbol = currency === 'GBP' ? '£' : currency;
+
+    // Update symbols
+    currencySymbol.textContent = symbol;
+
+    // Show/hide exchange rate input
+    if (currency === 'GBP') {
+      exchangeRateGroup.style.display = 'none';
+    } else {
+      exchangeRateGroup.style.display = 'block';
+
+      // Show system rate hint
+      const systemRate = exchangeRates[currency];
+      if (systemRate) {
+        exchangeRateHint.innerHTML = `<strong>System rate:</strong> 1 ${currency} = £${systemRate.toFixed(4)}`;
+        if (!exchangeRateInput.value) {
+          exchangeRateInput.placeholder = `e.g., ${systemRate.toFixed(4)}`;
+        }
+      }
+    }
+  }
+
+  currencySelect.addEventListener('change', updateCurrencyDisplay);
+  updateCurrencyDisplay(); // Initialize on page load
+</script>

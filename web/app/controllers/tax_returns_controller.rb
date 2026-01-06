@@ -1,5 +1,5 @@
 class TaxReturnsController < ApplicationController
-  before_action :set_tax_return, only: [:show, :update_calculator_settings]
+  before_action :set_tax_return, only: [:show, :update_calculator_settings, :toggle_blind_person]
 
   def index
     @tax_returns = current_user.tax_returns.includes(:tax_year).order(created_at: :desc)
@@ -24,6 +24,11 @@ class TaxReturnsController < ApplicationController
     @tax_return.update!(enabled_calculators: enabled_calculators.join(","))
 
     redirect_to tax_return_path(@tax_return), notice: "Calculator settings updated successfully."
+  end
+
+  def toggle_blind_person
+    @tax_return.update!(is_blind_person: !@tax_return.is_blind_person)
+    redirect_to tax_return_path(@tax_return), notice: "Blind Person status updated."
   end
 
   private

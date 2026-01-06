@@ -23,9 +23,12 @@ Rails.application.routes.draw do
   resources :tax_returns, only: [:index, :create, :show] do
     member do
       patch :update_calculator_settings
+      patch :toggle_blind_person
     end
 
     resources :income_sources, only: [:index, :new, :create, :edit, :update, :destroy]
+    resources :pension_contributions, only: [:index, :new, :create, :edit, :update, :destroy]
+    resources :gift_aid_donations, only: [:index, :new, :create, :edit, :update, :destroy]
 
     resources :exports, only: [:index, :create, :show] do
       collection do

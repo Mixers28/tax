@@ -13,12 +13,14 @@ module TaxCalculations
     end
 
     def calculate(gross_income)
-      pa = base_allowance
+      base_pa = base_allowance
+      blind_allowance = @tax_return.is_blind_person ? @tax_band.blind_persons_allowance : 0
+      total_pa = base_pa + blind_allowance
 
       # Phase 5a: Withdraw PA if income > £125,140
       if gross_income > PA_WITHDRAWAL_THRESHOLD
         withdrawal = (gross_income - PA_WITHDRAWAL_THRESHOLD) * PA_WITHDRAWAL_RATE
-        pa = [pa - withdrawal, 0].max
+        total_pa = [total_pa - withdrawal, 0].max
       end
 
       TaxCalculationBreakdown.record_step(
@@ -26,14 +28,16 @@ module TaxCalculations
         "personal_allowance",
         {
           gross_income: gross_income,
-          base_pa: base_allowance,
+          base_pa: base_pa,
+          blind_allowance: blind_allowance,
+          total_pa_before_withdrawal: base_pa + blind_allowance,
           withdrawal_threshold: PA_WITHDRAWAL_THRESHOLD
         },
-        pa,
-        "Personal Allowance: £#{format('%.2f', pa)}"
+        total_pa,
+        "Personal Allowance: £#{format('%.2f', base_pa)} + Blind £#{format('%.2f', blind_allowance)} = £#{format('%.2f', total_pa)}"
       )
 
-      pa
+      { base_pa: base_pa, blind_allowance: blind_allowance, total_pa: total_pa }
     end
 
     private

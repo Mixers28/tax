@@ -6,30 +6,46 @@ module TaxCalculations
       @tax_return = tax_return
     end
 
-    # Main calculation entry point for Phase 5a (basic employment income)
+    # Main calculation entry point for Phase 5b (employment + pension relief + gift aid + blind allowance)
     def calculate
-      # Phase 5a: Basic employment income + tax + NI
+      # Phase 5b: Employment income + pension relief + gift aid + blind allowance + tax + NI
       gross_income = IncomeAggregator.new(@tax_return).calculate
       tax_paid_at_source = IncomeSource.total_tax_taken(@tax_return)
 
-      # Personal Allowance
+      # Personal Allowance + Blind Allowance
       pa_calculator = PersonalAllowanceCalculator.new(@tax_return)
-      personal_allowance = pa_calculator.calculate(gross_income)
+      pa_result = pa_calculator.calculate(gross_income)
+      personal_allowance = pa_result[:total_pa]
 
-      # Taxable income
-      taxable_income = [gross_income - personal_allowance, 0].max
+      # Pension Relief
+      pension_result = PensionReliefCalculator.new(@tax_return).calculate
+      pension_relief = pension_result[:gross_contributions]
+
+      # Taxable income (after PA and pension relief)
+      taxable_income = [gross_income - personal_allowance - pension_relief, 0].max
       TaxCalculationBreakdown.record_step(
         @tax_return,
         "taxable_income",
-        { gross_income: gross_income, personal_allowance: personal_allowance },
+        {
+          gross_income: gross_income,
+          personal_allowance: personal_allowance,
+          pension_relief: pension_relief
+        },
         taxable_income,
         "Taxable Income: £#{format('%.2f', taxable_income)}"
       )
 
-      # Income tax by band
-      tax_result = TaxBandCalculator.new(@tax_return).calculate(taxable_income)
+      # Gift Aid band extension
+      gift_aid_result = GiftAidCalculator.new(@tax_return).calculate
+      gift_aid_band_extension = gift_aid_result[:band_extension]
 
-      # Class 1 National Insurance (only on employment income for Phase 5a)
+      # Income tax by band (with gift aid band extension)
+      tax_result = TaxBandCalculator.new(@tax_return).calculate(
+        taxable_income,
+        gift_aid_band_extension: gift_aid_band_extension
+      )
+
+      # Class 1 National Insurance (only on employment income)
       employment_income = IncomeSource.employment
         .where(tax_return: @tax_return)
         .sum(:amount_gross)
@@ -41,6 +57,14 @@ module TaxCalculations
       liability = TaxLiability.for_return(@tax_return)
       liability.update!(
         total_gross_income: gross_income,
+        personal_allowance_base: pa_result[:base_pa],
+        blind_persons_allowance: pa_result[:blind_allowance],
+        personal_allowance_total: personal_allowance,
+        pension_contributions_gross: pension_result[:gross_contributions],
+        pension_relief_at_source: pension_result[:relief_at_source],
+        gift_aid_donations_net: gift_aid_result[:donations_net],
+        gift_aid_gross_up: gift_aid_result[:gross_up],
+        gift_aid_extended_band: gift_aid_band_extension,
         taxable_income: taxable_income,
         basic_rate_tax: tax_result[:basic_rate_tax],
         higher_rate_tax: tax_result[:higher_rate_tax],
