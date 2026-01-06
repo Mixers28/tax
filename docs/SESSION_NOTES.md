@@ -38,6 +38,39 @@
 
 ## Recent Sessions (last 3-5)
 
+### 2026-01-06 (Session 6 - Export Calculation Debug & Fix)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Debugged Missing Calculations in PDF Exports**
+  - Issue: PDF exports showed correct structure but "No calculations available" in Section 3 despite Phase 5d implementation being complete
+  - Root cause identified: TaxLiabilityOrchestrator at line 72 was calling `HighIncomeChildBenefitCalculator.calculate(gross_income)` with an incorrect argument
+  - HighIncomeChildBenefitCalculator.calculate() method expects no arguments (calculates net_income internally)
+  - Fix applied: Removed the `gross_income` argument from the method call
+  - Verification: Orchestrator now successfully calculates tax liability with 31 calculation steps including all reliefs
+  - Test results: Export Service verified to include:
+    - Total Gross Income: £109,566.88
+    - Personal Allowance: £12,570.00
+    - Taxable Income: £96,246.88
+    - Income Tax breakdown: Basic £10,679 + Higher £17,140.75 = £27,819.75
+    - National Insurance: Class 1 £3,901.94 + Class 2 £163.80 + Class 4 £194.40 = £4,260.14
+    - Phase 5d reliefs: All fields present (Trading, Marriage, MCA)
+    - Net Liability: £16,895.81
+  - PDF exports now successfully show all 31 calculation steps
+
+### Files touched
+- web/app/services/tax_calculations/tax_liability_orchestrator.rb (MODIFIED - line 72 argument fix)
+- docs/NOW.md (UPDATED - documented bugfix)
+
+### Outcomes / Decisions
+- Critical bug fixed: PDF exports now show full tax calculations
+- Phase 5d implementation verified to be working correctly once orchestrator bug was fixed
+- No data integrity issues; bug was purely in method argument passing
+- Confirms entire Phase 5a-5d feature set is operational end-to-end
+- Ready for: Phase 5e (investment income), Phase 6 (multi-year returns), or production deployment
+
 ### 2026-01-06 (Session 5 - Phase 5d Complete: Advanced Tax Reliefs)
 
 **Participants:** User, Claude Code Agent
