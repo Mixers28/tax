@@ -188,6 +188,39 @@
         </div>
       <% end %>
 
+      <!-- Tax Liability Preview -->
+      <% if @tax_return.income_sources.any? %>
+        <div class="section">
+          <h2>💷 Tax Liability Preview</h2>
+          <p class="section-description">Tax calculations based on your income sources. Final calculations will be generated during export.</p>
+
+          <% if @tax_return.tax_liability.present? %>
+            <div class="liability-preview-cards">
+              <div class="liability-card">
+                <label>Total Gross Income</label>
+                <p class="value">£<%= number_with_precision(@tax_return.tax_liability.total_gross_income, precision: 2) %></p>
+              </div>
+              <div class="liability-card">
+                <label>Income Tax</label>
+                <p class="value">£<%= number_with_precision(@tax_return.tax_liability.total_income_tax, precision: 2) %></p>
+              </div>
+              <div class="liability-card">
+                <label>National Insurance</label>
+                <p class="value">£<%= number_with_precision(@tax_return.tax_liability.total_ni, precision: 2) %></p>
+              </div>
+              <div class="liability-card <%= @tax_return.tax_liability.owes_tax? ? 'owed' : 'refund' %>">
+                <label><%= @tax_return.tax_liability.owes_tax? ? "Amount Owed" : "Refund Due" %></label>
+                <p class="value">£<%= number_with_precision(@tax_return.tax_liability.net_liability.abs, precision: 2) %></p>
+              </div>
+            </div>
+          <% else %>
+            <div class="info-box">
+              <p>Tax liability will be calculated when you generate the export.</p>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <!-- Export Options -->
       <div class="export-section">
         <h2>Generate Export</h2>

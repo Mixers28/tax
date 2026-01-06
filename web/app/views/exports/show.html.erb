@@ -92,8 +92,84 @@
         <div class="calculations-section">
           <h2>Tax Calculations</h2>
           <div class="calculations-grid">
+            <!-- Tax Liability Calculation (Enhanced Display) -->
+            <% if @calculations["tax_liability"]&.dig(:success) %>
+              <% result = @calculations["tax_liability"] %>
+              <div class="calculation-card tax-liability-card">
+                <h3>💷 TAX LIABILITY</h3>
+
+                <!-- Income Section -->
+                <div class="liability-section">
+                  <h4>Income</h4>
+                  <div class="step">
+                    <span class="label">Total Gross Income</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][0][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step">
+                    <span class="label">Taxable Income</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][1][:value].to_f, precision: 2) %></span>
+                  </div>
+                </div>
+
+                <!-- Tax by Band -->
+                <div class="liability-section">
+                  <h4>Income Tax by Band</h4>
+                  <div class="step">
+                    <span class="label">Basic Rate (20%)</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][2][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step">
+                    <span class="label">Higher Rate (40%)</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][3][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step">
+                    <span class="label">Additional Rate (45%)</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][4][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step total">
+                    <span class="label">Total Income Tax</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][5][:value].to_f, precision: 2) %></span>
+                  </div>
+                </div>
+
+                <!-- National Insurance -->
+                <div class="liability-section">
+                  <h4>National Insurance</h4>
+                  <div class="step">
+                    <span class="label">Class 1 NI</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][6][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step total">
+                    <span class="label">Total NI</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][7][:value].to_f, precision: 2) %></span>
+                  </div>
+                </div>
+
+                <!-- Final Liability -->
+                <div class="liability-section final">
+                  <div class="step">
+                    <span class="label">Total Tax & NI</span>
+                    <span class="value">£<%= number_with_precision(result[:calculation_steps][8][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="step">
+                    <span class="label">Tax Paid at Source</span>
+                    <span class="value">-£<%= number_with_precision(result[:calculation_steps][9][:value].to_f, precision: 2) %></span>
+                  </div>
+                  <div class="calculation-result">
+                    <span class="label">Net Liability</span>
+                    <span class="value <%= result[:calculation_steps][10][:value].to_f > 0 ? 'owed' : 'refund' %>">
+                      £<%= number_with_precision(result[:calculation_steps][10][:value].to_f.abs, precision: 2) %>
+                      <small>(<%= result[:calculation_steps][10][:value].to_f > 0 ? 'Amount Owed' : 'Refund Due' %>)</small>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Other Calculations (Generic Display) -->
             <% @calculations.each do |calc_type, result| %>
               <% next unless result[:success] %>
+              <% next if calc_type == "tax_liability" %>
               <div class="calculation-card">
                 <h3><%= result[:calculation_type]&.upcase || calc_type&.upcase %></h3>
                 <% if result[:calculation_steps].present? %>

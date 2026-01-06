@@ -13,6 +13,7 @@
     <div class="content">
       <div class="tabs">
         <a href="#overview" class="tab-button active" data-tab="overview">Overview</a>
+        <a href="#income" class="tab-button" data-tab="income">Income</a>
         <a href="#evidence" class="tab-button" data-tab="evidence">Evidence</a>
         <a href="#validations" class="tab-button" data-tab="validations">Validations</a>
         <a href="#calculations" class="tab-button" data-tab="calculations">Calculations</a>
@@ -50,6 +51,58 @@
             <%= link_to "Run Validations", tax_return_validations_path(@tax_return), class: "btn btn-secondary" %>
             <%= link_to "View Calculations", tax_return_calculations_path(@tax_return), class: "btn btn-secondary" %>
             <%= link_to "Review & Export", "/tax_returns/#{@tax_return.id}/exports/review", class: "btn btn-primary" %>
+          </div>
+        </div>
+      </div>
+
+      <div id="income" class="tab-content">
+        <div class="section">
+          <h2>💷 Income Sources</h2>
+
+          <% if @tax_return.income_sources.any? %>
+            <div class="income-summary-cards">
+              <div class="summary-card">
+                <label>Total Gross Income</label>
+                <p class="value">£<%= number_with_precision(@tax_return.income_sources.sum(:amount_gross), precision: 2) %></p>
+              </div>
+              <div class="summary-card">
+                <label>Total Tax Taken</label>
+                <p class="value">£<%= number_with_precision(@tax_return.income_sources.sum(:amount_tax_taken), precision: 2) %></p>
+              </div>
+              <div class="summary-card">
+                <label>Number of Sources</label>
+                <p class="value"><%= @tax_return.income_sources.count %></p>
+              </div>
+            </div>
+
+            <div class="income-list-section">
+              <h3>Income Breakdown</h3>
+              <div class="income-items">
+                <% @tax_return.income_sources.each do |source| %>
+                  <div class="income-item">
+                    <div class="income-type">
+                      <span class="badge"><%= source.source_type.titleize %></span>
+                    </div>
+                    <div class="income-details">
+                      <p class="description"><%= source.description.present? ? source.description : "No description" %></p>
+                      <p class="amounts">
+                        Gross: <strong>£<%= number_with_precision(source.amount_gross, precision: 2) %></strong> &nbsp; | &nbsp;
+                        Tax: <strong>£<%= number_with_precision(source.amount_tax_taken, precision: 2) %></strong>
+                      </p>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <div class="empty-section">
+              <p class="empty-message">No income sources added yet</p>
+              <p class="text-muted">Add your income sources to calculate tax liability</p>
+            </div>
+          <% end %>
+
+          <div class="section-actions">
+            <%= link_to "Manage Income Sources", tax_return_income_sources_path(@tax_return), class: "btn btn-primary" %>
           </div>
         </div>
       </div>

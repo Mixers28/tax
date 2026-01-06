@@ -1,0 +1,54 @@
+<%= form_with model: income_source,
+              url: income_source.persisted? ?
+                   tax_return_income_source_path(@tax_return, income_source) :
+                   tax_return_income_sources_path(@tax_return),
+              method: income_source.persisted? ? :patch : :post,
+              local: true, class: "form-container" do |f| %>
+
+  <% if income_source.errors.any? %>
+    <div class="error-box">
+      <h3><%= pluralize(income_source.errors.count, "error") %> prohibited this income source from being saved:</h3>
+      <ul>
+        <% income_source.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :source_type, "Income Type" %>
+    <%= f.select :source_type,
+                 IncomeSource.source_types.keys.map { |k| [k.titleize, k] },
+                 { prompt: "Select income type" },
+                 { class: "form-control", required: true } %>
+    <small class="text-muted">e.g., Employment, Self-employment, Dividends, Interest, Pension</small>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :amount_gross, "Gross Amount (£)" %>
+    <%= f.number_field :amount_gross, step: 0.01, min: 0,
+                       class: "form-control", required: true,
+                       placeholder: "e.g., 50000.00" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :amount_tax_taken, "Tax Taken at Source (£)" %>
+    <%= f.number_field :amount_tax_taken, step: 0.01, min: 0, value: 0,
+                       class: "form-control",
+                       placeholder: "e.g., 10000.00" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :description, "Description (optional)" %>
+    <%= f.text_field :description, class: "form-control",
+                     placeholder: "e.g., Main employment, Side business, or source of income" %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.submit income_source.persisted? ? "Update Income Source" : "Add Income Source",
+                 class: "btn btn-primary" %>
+    <%= link_to "Cancel", tax_return_income_sources_path(@tax_return),
+                class: "btn btn-secondary" %>
+  </div>
+<% end %>

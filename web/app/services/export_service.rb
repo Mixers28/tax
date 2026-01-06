@@ -99,6 +99,35 @@ class ExportService
       Rails.logger.error("HICBC calculation failed: #{e.message}")
     end
 
+    # Tax Liability (Phase 5a)
+    begin
+      if @tax_return.income_sources.any?
+        orchestrator = TaxCalculations::TaxLiabilityOrchestrator.new(@tax_return)
+        liability = orchestrator.calculate
+
+        results["tax_liability"] = {
+          success: true,
+          calculation_type: "tax_liability",
+          output_value: liability.net_liability,
+          calculation_steps: [
+            { label: "Total Gross Income", value: liability.total_gross_income },
+            { label: "Taxable Income", value: liability.taxable_income },
+            { label: "Basic Rate Tax", value: liability.basic_rate_tax },
+            { label: "Higher Rate Tax", value: liability.higher_rate_tax },
+            { label: "Additional Rate Tax", value: liability.additional_rate_tax },
+            { label: "Total Income Tax", value: liability.total_income_tax },
+            { label: "Class 1 NI", value: liability.class_1_ni },
+            { label: "Total NI", value: liability.total_ni },
+            { label: "Total Tax & NI", value: liability.total_tax_and_ni },
+            { label: "Tax Paid at Source", value: liability.tax_paid_at_source },
+            { label: "Net Liability", value: liability.net_liability }
+          ]
+        }
+      end
+    rescue => e
+      Rails.logger.error("Tax Liability calculation failed: #{e.message}")
+    end
+
     results
   end
 

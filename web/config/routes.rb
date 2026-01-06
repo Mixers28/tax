@@ -25,6 +25,8 @@ Rails.application.routes.draw do
       patch :update_calculator_settings
     end
 
+    resources :income_sources, only: [:index, :new, :create, :edit, :update, :destroy]
+
     resources :exports, only: [:index, :create, :show] do
       collection do
         get :review

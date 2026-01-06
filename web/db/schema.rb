@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_05_101000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -176,6 +176,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
     t.index ["code", "year"], name: "index_form_definitions_on_code_and_year", unique: true
   end
 
+  create_table "income_sources", force: :cascade do |t|
+    t.decimal "amount_gross", precision: 12, scale: 2, null: false
+    t.decimal "amount_tax_taken", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.boolean "is_eligible_for_pa", default: true
+    t.boolean "is_eligible_for_relief", default: false
+    t.integer "source_type", default: 0, null: false
+    t.integer "tax_return_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_type"], name: "index_income_sources_on_source_type"
+    t.index ["tax_return_id"], name: "index_income_sources_on_tax_return_id"
+  end
+
   create_table "page_definitions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "form_definition_id", null: false
@@ -184,6 +198,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
     t.datetime "updated_at", null: false
     t.index ["form_definition_id", "page_code"], name: "index_page_definitions_on_form_definition_id_and_page_code", unique: true
     t.index ["form_definition_id"], name: "index_page_definitions_on_form_definition_id"
+  end
+
+  create_table "tax_bands", force: :cascade do |t|
+    t.decimal "additional_rate_percentage", precision: 5, scale: 2, null: false
+    t.decimal "basic_rate_limit", precision: 12, scale: 2, null: false
+    t.decimal "basic_rate_percentage", precision: 5, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.decimal "higher_rate_limit", precision: 12, scale: 2, null: false
+    t.decimal "higher_rate_percentage", precision: 5, scale: 2, null: false
+    t.decimal "ni_basic_percentage", precision: 5, scale: 2, null: false
+    t.decimal "ni_higher_percentage", precision: 5, scale: 2, null: false
+    t.decimal "ni_lower_threshold", precision: 12, scale: 2, null: false
+    t.decimal "ni_upper_threshold", precision: 12, scale: 2, null: false
+    t.decimal "pa_amount", precision: 12, scale: 2, null: false
+    t.integer "tax_year", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_year"], name: "index_tax_bands_on_tax_year", unique: true
+  end
+
+  create_table "tax_calculation_breakdowns", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "explanation"
+    t.json "inputs", default: {}
+    t.decimal "result", precision: 12, scale: 2
+    t.integer "sequence_order"
+    t.string "step_key", null: false
+    t.integer "tax_return_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_return_id", "step_key"], name: "index_tax_calculation_breakdowns_on_tax_return_id_and_step_key"
+    t.index ["tax_return_id"], name: "index_tax_calculation_breakdowns_on_tax_return_id"
   end
 
   create_table "tax_calculations", force: :cascade do |t|
@@ -200,6 +244,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
     t.index ["box_definition_id"], name: "index_tax_calculations_on_box_definition_id"
     t.index ["tax_return_id", "calculation_type"], name: "index_tax_calculations_on_tax_return_id_and_calculation_type"
     t.index ["tax_return_id"], name: "index_tax_calculations_on_tax_return_id"
+  end
+
+  create_table "tax_liabilities", force: :cascade do |t|
+    t.decimal "additional_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "basic_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "calculated_at"
+    t.string "calculated_by", default: "user_input"
+    t.json "calculation_inputs", default: {}
+    t.decimal "class_1_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "class_2_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "class_4_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.decimal "higher_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "net_liability", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "tax_paid_at_source", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "tax_return_id", null: false
+    t.decimal "taxable_income", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_gross_income", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_income_tax", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_tax_and_ni", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_return_id"], name: "index_tax_liabilities_on_tax_return_id", unique: true
   end
 
   create_table "tax_returns", force: :cascade do |t|
@@ -262,9 +329,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_05_100600) do
   add_foreign_key "exports", "tax_returns"
   add_foreign_key "exports", "users"
   add_foreign_key "extraction_runs", "evidences"
+  add_foreign_key "income_sources", "tax_returns"
   add_foreign_key "page_definitions", "form_definitions"
+  add_foreign_key "tax_calculation_breakdowns", "tax_returns"
   add_foreign_key "tax_calculations", "box_definitions"
   add_foreign_key "tax_calculations", "tax_returns"
+  add_foreign_key "tax_liabilities", "tax_returns"
   add_foreign_key "tax_returns", "tax_years"
   add_foreign_key "tax_returns", "users"
   add_foreign_key "validation_rules", "form_definitions"

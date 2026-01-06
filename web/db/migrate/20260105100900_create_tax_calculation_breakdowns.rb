@@ -3,7 +3,7 @@ class CreateTaxCalculationBreakdowns < ActiveRecord::Migration[8.1]
     create_table :tax_calculation_breakdowns do |t|
       t.references :tax_return, null: false, foreign_key: true
       t.string :step_key, null: false  # e.g., "employment_aggregation", "pa_relief", "basic_rate_tax"
-      t.jsonb :inputs, default: {}
+      t.json :inputs, default: {}
       t.decimal :result, precision: 12, scale: 2
       t.text :explanation
       t.integer :sequence_order

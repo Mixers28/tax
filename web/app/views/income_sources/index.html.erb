@@ -1,0 +1,242 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1>💷 Income Sources</h1>
+    <p class="subtitle">Manage your income sources for tax calculation</p>
+  </div>
+</div>
+
+<div class="tax-return-container">
+  <div class="breadcrumb">
+    <%= link_to "Tax Returns", tax_returns_path %> /
+    <%= link_to @tax_return.tax_year.label, tax_return_path(@tax_return) %> /
+    Income Sources
+  </div>
+
+  <% if @income_sources.any? %>
+    <div class="summary-cards">
+      <div class="summary-card">
+        <label>Total Gross Income</label>
+        <p class="value">£<%= number_with_precision(@tax_return.income_sources.sum(:amount_gross), precision: 2) %></p>
+      </div>
+      <div class="summary-card">
+        <label>Total Tax Taken</label>
+        <p class="value">£<%= number_with_precision(@tax_return.income_sources.sum(:amount_tax_taken), precision: 2) %></p>
+      </div>
+      <div class="summary-card">
+        <label>Net Amount (Approx)</label>
+        <p class="value">£<%= number_with_precision(@tax_return.income_sources.sum(:amount_gross) - @tax_return.income_sources.sum(:amount_tax_taken), precision: 2) %></p>
+      </div>
+      <div class="summary-card">
+        <label>Income Sources</label>
+        <p class="value"><%= @income_sources.count %></p>
+      </div>
+    </div>
+
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Gross Amount</th>
+            <th>Tax Taken</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @income_sources.each do |source| %>
+            <tr>
+              <td>
+                <span class="badge badge-primary"><%= source.source_type.titleize %></span>
+              </td>
+              <td class="description">
+                <%= source.description.present? ? source.description : "-" %>
+              </td>
+              <td class="amount">£<%= number_with_precision(source.amount_gross, precision: 2) %></td>
+              <td class="amount">£<%= number_with_precision(source.amount_tax_taken, precision: 2) %></td>
+              <td class="actions">
+                <%= link_to "Edit", edit_tax_return_income_source_path(@tax_return, source), class: "link-btn" %>
+                <%= button_to "Delete", tax_return_income_source_path(@tax_return, source),
+                              method: :delete,
+                              form: { data: { turbo_confirm: "Are you sure?" } },
+                              class: "link-btn delete" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <p class="empty-message">No income sources added yet</p>
+      <p class="text-muted">Add your first income source to get started with tax calculations</p>
+    </div>
+  <% end %>
+
+  <div class="form-actions">
+    <%= link_to "Add Income Source", new_tax_return_income_source_path(@tax_return), class: "btn btn-primary" %>
+    <%= link_to "Back to Tax Return", tax_return_path(@tax_return), class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<style>
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .summary-card label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .summary-card .value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .data-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .data-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .data-table tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .data-table .amount {
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .data-table .description {
+    color: #666;
+  }
+
+  .data-table .actions {
+    text-align: center;
+  }
+
+  .link-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    color: #667eea;
+    text-decoration: none;
+    border: 1px solid #667eea;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+
+  .link-btn:hover {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .link-btn.delete {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .link-btn.delete:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .badge-primary {
+    background-color: #e7f0ff;
+    color: #667eea;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .empty-message {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #5568d3;
+  }
+
+  .btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background-color: #dee2e6;
+  }
+</style>
