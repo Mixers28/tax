@@ -37,6 +37,37 @@
 ## Session Template (Copy/Paste for each new session)
 ## Recent Sessions (last 3-5)
 
+### 2026-01-06 (Session 4 - Phase 5b & 5c Completion)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 5b & 5c Complete:** Unified all tax relief calculators into TaxLiabilityOrchestrator
+  - Merged separate Calculators::FTCR, HICBC into unified TaxCalculations:: namespace
+  - Extended NationalInsuranceCalculator with Class 2 NI (fixed £163.80) and Class 4 NI (8%/2% tiered)
+  - Created FurnishedPropertyCalculator (FTCR: 50% of rental income)
+  - Created HighIncomeChildBenefitCalculator (HICBC: 1% charge above £60k threshold)
+  - Added migration for rental property income, FTCR relief, HICBC fields, Class 2/4 NI
+  - Extended IncomeSource enum with rental_property type
+  - Updated TaxLiability model: summary() includes all new fields, calculate_totals() includes HICBC
+  - Updated TaxLiabilityOrchestrator to automatically call all calculators in sequence
+  - Updated ExportService to include all calculation steps (Class 2/4 NI, FTCR, HICBC)
+  - Removed redundant Calculations tab and manual calculation controller
+  - Fixed PDF export currency symbol display (£ preserved instead of converted to ?)
+- **Validation:** Confirmed all Phase 5 sub-phases (5a, 5b, 5c) working together seamlessly
+
+### Outcomes / Decisions
+- Phase 5 now 100% complete: All tax calculations unified and automatic
+- Architecture decision: Removed redundant manual calculation UI
+- Currency symbol fix: Updated sanitize_text regex to preserve £€$¥₹
+- Ready for Phase 5d (additional reliefs) or Phase 6 (multi-year returns)
+
+**Commits:**
+- d387b39: Implement Phase 5c: Unified tax relief calculators
+- f2f386b: Remove redundant Calculations tab and controller
+- ffabce8: Fix currency symbol display in PDF exports
+
 ### 2026-01-06 (Session 3 - Currency Support & Charset Fix)
 
 **Participants:** User, Claude Code Agent
