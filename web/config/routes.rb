@@ -45,14 +45,6 @@ Rails.application.routes.draw do
         post :run_validation
       end
     end
-
-    resources :calculations, only: [:index] do
-      collection do
-        post :calculate_ftcr
-        post :calculate_gift_aid
-        post :calculate_hicbc
-      end
-    end
   end
 
   resources :evidences, only: [:new, :create, :show] do

@@ -17,7 +17,6 @@
         <a href="#reliefs" class="tab-button" data-tab="reliefs">Tax Reliefs</a>
         <a href="#evidence" class="tab-button" data-tab="evidence">Evidence</a>
         <a href="#validations" class="tab-button" data-tab="validations">Validations</a>
-        <a href="#calculations" class="tab-button" data-tab="calculations">Calculations</a>
         <a href="#exports" class="tab-button" data-tab="exports">Exports</a>
         <a href="#settings" class="tab-button" data-tab="settings">Settings</a>
       </div>
@@ -50,7 +49,6 @@
           <div class="actions">
             <%= link_to "Upload Evidence", new_evidence_path(tax_return_id: @tax_return.id), class: "btn btn-primary" %>
             <%= link_to "Run Validations", tax_return_validations_path(@tax_return), class: "btn btn-secondary" %>
-            <%= link_to "View Calculations", tax_return_calculations_path(@tax_return), class: "btn btn-secondary" %>
             <%= link_to "Review & Export", "/tax_returns/#{@tax_return.id}/exports/review", class: "btn btn-primary" %>
           </div>
         </div>
@@ -257,13 +255,6 @@
         <div class="section">
           <h2>Validations</h2>
           <p><%= link_to "Run Validations", tax_return_validations_path(@tax_return), class: "btn btn-primary" %></p>
-        </div>
-      </div>
-
-      <div id="calculations" class="tab-content">
-        <div class="section">
-          <h2>Tax Calculations</h2>
-          <p><%= link_to "View Calculations", tax_return_calculations_path(@tax_return), class: "btn btn-primary" %></p>
         </div>
       </div>
 
