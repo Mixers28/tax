@@ -81,6 +81,33 @@
 - Completeness checklist and validation rules.
 - FTCR/Gift Aid/HICBC deterministic calculators.
 
+### Phase 5 - Full tax calculation engine
+Comprehensive UK Self Assessment tax liability calculator with modular, deterministic services.
+
+**Sub-phases:**
+- **Phase 5a (MVP):** Basic employment income tax calculator
+  - Income aggregation from multiple sources
+  - Personal Allowance: £12,570 (withdrawal above £125,140)
+  - Tax bands: 20% (basic), 40% (higher), 45% (additional)
+  - Class 1 National Insurance: 8% (£12,571–£50,270), 2% (£50,271+)
+  - UI: Income entry form with CRUD operations, TaxReturn integration
+  - Currency support: EUR/USD input with automatic GBP conversion (cached exchange rates)
+  - Export integration: Tax liability preview in review page, detailed breakdown in show page
+  - Data models: TaxBand, IncomeSource, TaxLiability, TaxCalculationBreakdown
+  - Architecture: Modular service classes (IncomeAggregator, PersonalAllowanceCalculator, TaxBandCalculator, NationalInsuranceCalculator, TaxLiabilityOrchestrator)
+
+- **Phase 5b:** Pension relief, Gift Aid, Blind Allowance
+- **Phase 5c:** Investment income (dividends, interest, capital gains)
+- **Phase 5d:** Self-employment income and Class 2/4 NI
+- **Phase 5e:** Marriage Allowance, Married Couple's Allowance, advanced reliefs
+
+**Implementation notes:**
+- All calculations are deterministic and auditable (no AI decision-making)
+- Tax results are suggestions users can override before export
+- Exchange rates cached in docker-compose.yml (zero external API calls)
+- Calculation steps stored in database for full transparency
+- 2024-25 UK tax year thresholds and rates
+
 ## Acceptance Criteria
 - App runs fully offline; no outbound network calls in default mode.
 - Evidence files are stored on disk encrypted and cannot be read without keys.
