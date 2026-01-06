@@ -7,15 +7,21 @@
 **Current Focus (auto-maintained by Agent):**
 - Phase 4: PDF/JSON export generation (COMPLETE ✓)
 - Phase 5: Full tax calculation engine specification (COMPLETE ✓)
-- Phase 5a: Basic employment income tax calculator (COMPLETE ✓ + Database operational)
-- Database migrations all operational, models tested, ready for Phase 5a integration
+- Phase 5a: Basic employment income tax calculator (COMPLETE ✓ + UI + Integration)
+- Income entry form, tax calculation pipeline, export integration all operational
 <!-- SUMMARY_END -->
 
 ---
 
 ## Current Objective
 
-Phase 5a complete: Basic employment income tax calculator fully implemented with 4 modular calculator services, 4 new models, database migrations all running successfully, and comprehensive test documentation. All models tested and operational. Ready for Phase 5a integration into export feature.
+Phase 5a complete: Full implementation of basic employment income tax calculator with:
+- ✅ Income entry UI (IncomeSourcesController + form views)
+- ✅ Tax calculation pipeline (IncomeAggregator → PA → Tax Bands → NI)
+- ✅ Export integration (TaxLiabilityOrchestrator in ExportService)
+- ✅ Enhanced export views (review preview + detailed show breakdown)
+- ✅ Database operational (4 migrations, 4 models, all tested)
+- Ready to proceed to Phase 5b (Pension Relief) or Phase 5a integration testing
 
 ---
 
@@ -49,6 +55,7 @@ Phase 5a complete: Basic employment income tax calculator fully implemented with
 
 ## Phase 5a Completion Summary (COMPLETE ✓)
 
+### Database & Models (2026-01-05)
 - [x] Income aggregation from multiple P60s (IncomeAggregator service)
 - [x] Personal Allowance calculation: £12,570 with withdrawal above £125,140
 - [x] Tax band calculator: 20%, 40%, 45% all three bands working correctly
@@ -58,17 +65,29 @@ Phase 5a complete: Basic employment income tax calculator fully implemented with
 - [x] TaxLiability model: Store complete calculation results
 - [x] TaxCalculationBreakdown model: Audit trail of all calculation steps
 - [x] TaxLiabilityOrchestrator: Master calculator orchestrator
-- [x] Database migrations: Create all new tables
-- [x] Comprehensive test specs: 4 test files with documented scenarios
+- [x] Database migrations: Create all 4 new tables, all operational
+
+### UI & Integration (2026-01-06)
+- [x] IncomeSourcesController: Full CRUD operations for income management
+- [x] Income form views: new.html.erb, edit.html.erb, _form.html.erb with validation
+- [x] Income index page: List view with summary cards and actions
+- [x] Income tab in TaxReturn show page: Summary cards + income breakdown
+- [x] Export review page: Tax liability preview with summary cards
+- [x] Export show page: Enhanced liability breakdown by band + NI
+- [x] ExportService integration: TaxLiabilityOrchestrator called during export
+- [x] Routes configured: Nested income_sources under tax_returns
+
+### Documentation & Testing
 - [x] PHASE_5A_README.md: Complete architecture and usage documentation
+- [x] Comprehensive test specs: 4 test files with documented scenarios
+- [x] Implementation commit: Complete Phase 5a UI + integration code
 
 ---
 
 ## Backlog / Next Phases
 
-- [ ] **Phase 5a Integration:** Wire Phase 5a calculator into export feature (show calculations in exports)
-- [ ] **Phase 5a UI:** Create income entry form and tax calculation summary page
-- [ ] Phase 5b: Pension relief, Gift Aid, Blind Allowance calculators
+- [ ] **Phase 5a Testing & Validation:** End-to-end testing of income entry, calculation, and export workflow
+- [ ] **Phase 5b:** Pension relief, Gift Aid, Blind Allowance calculators
 - [ ] Phase 5c: Investment income (dividends, interest, capital gains)
 - [ ] Phase 5d: Self-employment income and Class 2/4 NI
 - [ ] Phase 5e: Marriage Allowance, Married Couple's Allowance, advanced reliefs
