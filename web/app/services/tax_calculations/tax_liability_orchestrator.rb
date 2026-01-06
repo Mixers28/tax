@@ -53,6 +53,25 @@ module TaxCalculations
 
       class_1_ni = NationalInsuranceCalculator.new(@tax_return).calculate_class_1(employment_income)
 
+      # Self-employment income
+      self_employment_income = IncomeSource.self_employment
+        .where(tax_return: @tax_return)
+        .sum(:amount_gross)
+        .to_f
+
+      # Class 2 & 4 National Insurance (for self-employed)
+      ni_calculator = NationalInsuranceCalculator.new(@tax_return)
+      class_2_ni = self_employment_income > 0 ? ni_calculator.calculate_class_2(self_employment_income) : 0
+      class_4_ni = self_employment_income > 0 ? ni_calculator.calculate_class_4(self_employment_income) : 0
+
+      # Furnished Property Relief (FTCR)
+      ftcr_result = FurnishedPropertyCalculator.new(@tax_return).calculate
+      furnished_relief = ftcr_result[:ftcr_relief]
+
+      # High Income Child Benefit Charge (HICBC)
+      hicbc_result = HighIncomeChildBenefitCalculator.new(@tax_return).calculate(gross_income)
+      hicbc_charge = hicbc_result[:hicbc_charge]
+
       # Create or update TaxLiability record
       liability = TaxLiability.for_return(@tax_return)
       liability.update!(
@@ -65,26 +84,37 @@ module TaxCalculations
         gift_aid_donations_net: gift_aid_result[:donations_net],
         gift_aid_gross_up: gift_aid_result[:gross_up],
         gift_aid_extended_band: gift_aid_band_extension,
+        rental_property_income: ftcr_result[:rental_income],
+        furnished_property_relief: furnished_relief,
+        self_employment_income: self_employment_income,
+        hicbc_threshold_income: hicbc_result[:net_income],
+        hicbc_charge: hicbc_charge,
         taxable_income: taxable_income,
         basic_rate_tax: tax_result[:basic_rate_tax],
         higher_rate_tax: tax_result[:higher_rate_tax],
         additional_rate_tax: tax_result[:additional_rate_tax],
         total_income_tax: tax_result[:total_income_tax],
         class_1_ni: class_1_ni,
-        class_2_ni: 0,
-        class_4_ni: 0,
+        class_2_ni: class_2_ni,
+        class_4_ni: class_4_ni,
         tax_paid_at_source: tax_paid_at_source,
         calculated_by: "auto",
         calculated_at: Time.current
       )
 
       # Record final summary
+      total_ni = class_1_ni + class_2_ni + class_4_ni
       TaxCalculationBreakdown.record_step(
         @tax_return,
         "final_liability",
         {
           total_income_tax: tax_result[:total_income_tax],
-          total_ni: class_1_ni,
+          class_1_ni: class_1_ni,
+          class_2_ni: class_2_ni,
+          class_4_ni: class_4_ni,
+          total_ni: total_ni,
+          furnished_property_relief: furnished_relief,
+          hicbc_charge: hicbc_charge,
           tax_paid_at_source: tax_paid_at_source
         },
         liability.net_liability,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_06_015646) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_06_022312) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -260,15 +260,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_015646) do
     t.decimal "class_2_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "class_4_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
+    t.decimal "furnished_property_relief", precision: 12, scale: 2, default: "0.0"
     t.decimal "gift_aid_donations_net", precision: 12, scale: 2, default: "0.0"
     t.decimal "gift_aid_extended_band", precision: 12, scale: 2, default: "0.0"
     t.decimal "gift_aid_gross_up", precision: 12, scale: 2, default: "0.0"
+    t.decimal "hicbc_charge", precision: 12, scale: 2, default: "0.0"
+    t.decimal "hicbc_threshold_income", precision: 12, scale: 2, default: "0.0"
     t.decimal "higher_rate_tax", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "net_liability", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "pension_contributions_gross", precision: 12, scale: 2, default: "0.0"
     t.decimal "pension_relief_at_source", precision: 12, scale: 2, default: "0.0"
     t.decimal "personal_allowance_base", precision: 12, scale: 2, default: "0.0"
     t.decimal "personal_allowance_total", precision: 12, scale: 2, default: "0.0"
+    t.decimal "rental_property_income", precision: 12, scale: 2, default: "0.0"
+    t.decimal "self_employment_income", precision: 12, scale: 2, default: "0.0"
     t.decimal "tax_paid_at_source", precision: 12, scale: 2, default: "0.0", null: false
     t.integer "tax_return_id", null: false
     t.decimal "taxable_income", precision: 12, scale: 2, default: "0.0", null: false

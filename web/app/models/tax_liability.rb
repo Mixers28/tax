@@ -36,8 +36,16 @@ class TaxLiability < ApplicationRecord
       gift_aid_donations_net: gift_aid_donations_net,
       gift_aid_gross_up: gift_aid_gross_up,
       gift_aid_extended_band: gift_aid_extended_band,
+      rental_property_income: rental_property_income,
+      furnished_property_relief: furnished_property_relief,
+      self_employment_income: self_employment_income,
+      hicbc_threshold_income: hicbc_threshold_income,
+      hicbc_charge: hicbc_charge,
       taxable_income: taxable_income,
       total_income_tax: total_income_tax,
+      class_1_ni: class_1_ni,
+      class_2_ni: class_2_ni,
+      class_4_ni: class_4_ni,
       total_ni: total_ni,
       total_tax_and_ni: total_tax_and_ni,
       tax_paid_at_source: tax_paid_at_source,
@@ -56,8 +64,8 @@ class TaxLiability < ApplicationRecord
     # Sum up NI
     self.total_ni = (class_1_ni || 0) + (class_2_ni || 0) + (class_4_ni || 0)
 
-    # Total liability
-    self.total_tax_and_ni = total_income_tax + total_ni
+    # Total liability (includes HICBC charge if applicable)
+    self.total_tax_and_ni = total_income_tax + total_ni + (hicbc_charge || 0)
 
     # Net payable/repayable
     self.net_liability = total_tax_and_ni - (tax_paid_at_source || 0)
