@@ -26,6 +26,7 @@ Phase 5a/5b/5c/5d **COMPLETE** - Unified tax relief calculator fully operational
 - ✅ **UI cleanup:** Removed redundant Calculations tab; added Phase 5d relief cards
 - ✅ **PDF symbol fix:** Currency symbols (£€$¥₹) now display correctly in exports
 - ✅ **Phase 5d features:** Three new relief calculators, controller actions, routes, UI forms with JavaScript toggle
+- ✅ **BUGFIX (2026-01-06):** Fixed TaxLiabilityOrchestrator HICBC method call - PDF exports now show full 31 calculation steps
 - Next: Phase 5e (investment income) or Phase 6 (multi-year returns) or HMRC filing integration
 
 ---
