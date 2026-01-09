@@ -29,6 +29,30 @@ class ExportsController < ApplicationController
     redirect_to tax_return_exports_path(@tax_return), alert: "Export failed: #{e.message}"
   end
 
+  def legacy_export
+    format = params[:format]
+    format = "both" unless %w[pdf json both].include?(format)
+
+    export = ExportService.new(@tax_return, current_user, format).generate!
+
+    if format == "pdf" && export.file_path.present? && File.exist?(export.file_path)
+      send_file export.file_path,
+                filename: "tax_return_#{@tax_return.id}.pdf",
+                type: "application/pdf",
+                disposition: "attachment"
+    elsif format == "json" && export.json_path.present? && File.exist?(export.json_path)
+      send_file export.json_path,
+                filename: "tax_return_#{@tax_return.id}.json",
+                type: "application/json",
+                disposition: "attachment"
+    else
+      redirect_to tax_return_export_path(@tax_return, export)
+    end
+  rescue StandardError => e
+    Rails.logger.error("Legacy export failed: #{e.class} - #{e.message}")
+    redirect_to tax_return_path(@tax_return), alert: "Export failed: #{e.message}"
+  end
+
   def show
     @validation_summary = @export.validation_summary
     @calculations = @export.calculation_results || {}
@@ -61,7 +85,8 @@ class ExportsController < ApplicationController
   private
 
   def set_tax_return
-    @tax_return = current_user.tax_returns.find(params[:tax_return_id])
+    tax_return_id = params[:tax_return_id] || params[:id]
+    @tax_return = current_user.tax_returns.find(tax_return_id)
   end
 
   def set_export

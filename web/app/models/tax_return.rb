@@ -16,6 +16,7 @@ class TaxReturn < ApplicationRecord
   has_many :income_sources, dependent: :destroy
   has_one :tax_liability, dependent: :destroy
   has_many :tax_calculation_breakdowns, dependent: :destroy
+  has_one :return_workspace, dependent: :destroy
 
   validates :status, presence: true
   validates :is_blind_person, inclusion: { in: [true, false] }

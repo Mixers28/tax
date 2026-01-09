@@ -1,0 +1,158 @@
+<div class="worksheet">
+  <div class="worksheet-header">
+    <h1>HMRC Copy Worksheet</h1>
+    <div class="worksheet-meta">
+      <p>Tax Year: <%= @tax_return.tax_year.label %></p>
+      <p>Return ID: <%= @tax_return.id %></p>
+      <p>Generated: <%= @worksheet[:generated_at].strftime("%d %b %Y %H:%M") %></p>
+    </div>
+  </div>
+
+  <% @worksheet[:forms].each do |form| %>
+    <div class="worksheet-section">
+      <h2><%= form[:code] %><%= form[:year] ? " (#{form[:year]})" : "" %></h2>
+
+      <% form[:pages].each do |page| %>
+        <div class="worksheet-page">
+          <h3>Page <%= page[:code] %></h3>
+          <table class="worksheet-table">
+            <thead>
+              <tr>
+                <th>Box</th>
+                <th>Description</th>
+                <th>Value</th>
+                <th>Notes</th>
+                <th>Evidence</th>
+                <th>FX</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% page[:rows].each do |row| %>
+                <tr>
+                  <td><%= row[:box_code] || "Custom" %></td>
+                  <td><%= row[:label] %></td>
+                  <td><%= row[:value].presence || "—" %></td>
+                  <td><%= row[:note].presence || "—" %></td>
+                  <td>
+                    <% if row[:evidence].present? %>
+                      <%= row[:evidence].join(", ") %>
+                    <% else %>
+                      —
+                    <% end %>
+                  </td>
+                  <td><%= row[:fx_summary].presence || "—" %></td>
+                  <td><%= row[:required] ? "Yes" : "No" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="worksheet-section">
+    <h2>Schedules & Cross-References</h2>
+
+    <% if @worksheet[:schedules].present? && @worksheet[:schedules][:sa106_f6].present? %>
+      <h3>SA106 F6 Schedule</h3>
+      <table class="worksheet-table">
+        <thead>
+          <tr>
+            <th>Box</th>
+            <th>Description</th>
+            <th>Value</th>
+            <th>Notes</th>
+            <th>Evidence</th>
+            <th>FX</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @worksheet[:schedules][:sa106_f6].each do |row| %>
+            <tr>
+              <td><%= row[:box_code] || "Custom" %></td>
+              <td><%= row[:label] %></td>
+              <td><%= row[:value].presence || "—" %></td>
+              <td><%= row[:note].presence || "—" %></td>
+              <td>
+                <% if row[:evidence].present? %>
+                  <%= row[:evidence].join(", ") %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td><%= row[:fx_summary].presence || "—" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No schedules generated.</p>
+    <% end %>
+
+    <% if @worksheet[:tr7_note].present? %>
+      <div class="worksheet-note">
+        <strong>TR7 note:</strong> <%= @worksheet[:tr7_note] %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .worksheet {
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #111827;
+    padding: 2rem;
+    background: #ffffff;
+  }
+
+  .worksheet-header {
+    border-bottom: 2px solid #1f2937;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .worksheet-meta p {
+    margin: 0.2rem 0;
+  }
+
+  .worksheet-section {
+    margin-bottom: 2rem;
+  }
+
+  .worksheet-page {
+    margin-top: 1rem;
+  }
+
+  .worksheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+  }
+
+  .worksheet-table th,
+  .worksheet-table td {
+    border: 1px solid #d1d5db;
+    padding: 0.6rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .worksheet-table th {
+    background: #f3f4f6;
+  }
+
+  .worksheet-note {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+  }
+
+  @media print {
+    .worksheet {
+      padding: 0;
+    }
+  }
+</style>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_07_000006) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.datetime "created_at", null: false
@@ -107,6 +107,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.index ["evidence_id"], name: "index_evidence_box_values_on_evidence_id"
   end
 
+  create_table "evidence_links", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "evidence_id", null: false
+    t.integer "linkable_id", null: false
+    t.string "linkable_type", null: false
+    t.text "note"
+    t.datetime "updated_at", null: false
+    t.index ["evidence_id", "linkable_type", "linkable_id"], name: "index_evidence_links_on_evidence_and_linkable", unique: true
+    t.index ["evidence_id"], name: "index_evidence_links_on_evidence_id"
+    t.index ["linkable_type", "linkable_id"], name: "index_evidence_links_on_linkable"
+  end
+
   create_table "evidences", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "evidence_type", default: "supporting_document"
@@ -167,6 +179,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.index ["status"], name: "index_extraction_runs_on_status"
   end
 
+  create_table "field_values", force: :cascade do |t|
+    t.datetime "confirmed_at"
+    t.datetime "created_at", null: false
+    t.text "note"
+    t.integer "return_workspace_id", null: false
+    t.integer "template_field_id", null: false
+    t.datetime "updated_at", null: false
+    t.text "value_raw"
+    t.index ["return_workspace_id", "template_field_id"], name: "index_field_values_on_workspace_and_field", unique: true
+    t.index ["return_workspace_id"], name: "index_field_values_on_return_workspace_id"
+    t.index ["template_field_id"], name: "index_field_values_on_template_field_id"
+  end
+
   create_table "form_definitions", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -174,6 +199,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.json "version_meta"
     t.integer "year", null: false
     t.index ["code", "year"], name: "index_form_definitions_on_code_and_year", unique: true
+  end
+
+  create_table "fx_provenances", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "exchange_rate", precision: 12, scale: 6
+    t.decimal "gbp_amount", precision: 12, scale: 2
+    t.text "note"
+    t.decimal "original_amount", precision: 12, scale: 2
+    t.string "original_currency", limit: 3
+    t.integer "provenanceable_id", null: false
+    t.string "provenanceable_type", null: false
+    t.string "rate_method"
+    t.string "rate_period"
+    t.string "rate_source"
+    t.datetime "updated_at", null: false
+    t.index ["provenanceable_type", "provenanceable_id"], name: "index_fx_provenances_on_provenanceable"
   end
 
   create_table "income_sources", force: :cascade do |t|
@@ -200,6 +241,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.datetime "updated_at", null: false
     t.index ["form_definition_id", "page_code"], name: "index_page_definitions_on_form_definition_id_and_page_code", unique: true
     t.index ["form_definition_id"], name: "index_page_definitions_on_form_definition_id"
+  end
+
+  create_table "return_workspaces", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "tax_return_id", null: false
+    t.integer "template_profile_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_return_id"], name: "index_return_workspaces_on_tax_return_id_unique", unique: true
+    t.index ["template_profile_id"], name: "index_return_workspaces_on_template_profile_id"
   end
 
   create_table "tax_bands", force: :cascade do |t|
@@ -260,6 +310,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.decimal "class_2_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "class_4_ni", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
+    t.decimal "dividend_additional_rate_tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "dividend_allowance_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "dividend_basic_rate_tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "dividend_higher_rate_tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "dividend_income_gross", precision: 12, scale: 2, default: "0.0"
+    t.decimal "dividend_income_taxable", precision: 12, scale: 2, default: "0.0"
     t.decimal "furnished_property_relief", precision: 12, scale: 2, default: "0.0"
     t.decimal "gift_aid_donations_net", precision: 12, scale: 2, default: "0.0"
     t.decimal "gift_aid_extended_band", precision: 12, scale: 2, default: "0.0"
@@ -277,10 +333,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.decimal "personal_allowance_base", precision: 12, scale: 2, default: "0.0"
     t.decimal "personal_allowance_total", precision: 12, scale: 2, default: "0.0"
     t.decimal "rental_property_income", precision: 12, scale: 2, default: "0.0"
+    t.decimal "savings_allowance_amount", precision: 12, scale: 2, default: "0.0"
+    t.decimal "savings_interest_gross", precision: 12, scale: 2, default: "0.0"
+    t.decimal "savings_interest_tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "savings_interest_taxable", precision: 12, scale: 2, default: "0.0"
     t.decimal "self_employment_income", precision: 12, scale: 2, default: "0.0"
     t.decimal "tax_paid_at_source", precision: 12, scale: 2, default: "0.0", null: false
     t.integer "tax_return_id", null: false
     t.decimal "taxable_income", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_dividend_tax", precision: 12, scale: 2, default: "0.0"
     t.decimal "total_gross_income", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "total_income_tax", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "total_ni", precision: 12, scale: 2, default: "0.0", null: false
@@ -321,6 +382,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
     t.index ["label"], name: "index_tax_years_on_label", unique: true
   end
 
+  create_table "template_fields", force: :cascade do |t|
+    t.integer "box_definition_id"
+    t.datetime "created_at", null: false
+    t.string "data_type", default: "text", null: false
+    t.string "label"
+    t.integer "position"
+    t.boolean "required", default: true, null: false
+    t.integer "template_profile_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["box_definition_id"], name: "index_template_fields_on_box_definition_id"
+    t.index ["template_profile_id", "box_definition_id"], name: "index_template_fields_on_profile_and_box_def", unique: true
+    t.index ["template_profile_id", "position"], name: "index_template_fields_on_template_profile_id_and_position"
+    t.index ["template_profile_id"], name: "index_template_fields_on_template_profile_id"
+  end
+
+  create_table "template_profiles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -354,19 +437,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_06_023001) do
   add_foreign_key "box_values", "tax_returns"
   add_foreign_key "evidence_box_values", "box_values"
   add_foreign_key "evidence_box_values", "evidences"
+  add_foreign_key "evidence_links", "evidences"
   add_foreign_key "evidences", "tax_returns"
   add_foreign_key "export_evidences", "evidences"
   add_foreign_key "export_evidences", "exports"
   add_foreign_key "exports", "tax_returns"
   add_foreign_key "exports", "users"
   add_foreign_key "extraction_runs", "evidences"
+  add_foreign_key "field_values", "return_workspaces"
+  add_foreign_key "field_values", "template_fields"
   add_foreign_key "income_sources", "tax_returns"
   add_foreign_key "page_definitions", "form_definitions"
+  add_foreign_key "return_workspaces", "tax_returns"
+  add_foreign_key "return_workspaces", "template_profiles"
   add_foreign_key "tax_calculation_breakdowns", "tax_returns"
   add_foreign_key "tax_calculations", "box_definitions"
   add_foreign_key "tax_calculations", "tax_returns"
   add_foreign_key "tax_liabilities", "tax_returns"
   add_foreign_key "tax_returns", "tax_years"
   add_foreign_key "tax_returns", "users"
+  add_foreign_key "template_fields", "box_definitions"
+  add_foreign_key "template_fields", "template_profiles"
   add_foreign_key "validation_rules", "form_definitions"
 end

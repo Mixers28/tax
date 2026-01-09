@@ -1,5 +1,5 @@
 class TaxReturnsController < ApplicationController
-  before_action :set_tax_return, only: [:show, :update_calculator_settings, :toggle_blind_person]
+  before_action :set_tax_return, only: [:show, :checklist, :worksheet, :update_calculator_settings, :toggle_blind_person]
 
   def index
     @tax_returns = current_user.tax_returns.includes(:tax_year).order(created_at: :desc)
@@ -12,11 +12,29 @@ class TaxReturnsController < ApplicationController
     end
 
     tax_return = current_user.tax_returns.create!(tax_year: tax_year, status: "draft")
+    template_profile = TemplateProfile.first
+    ReturnWorkspaceGenerator.call(tax_return: tax_return, template_profile: template_profile) if template_profile
 
     redirect_to new_evidence_path(tax_return_id: tax_return.id), notice: "Draft tax return created."
   end
 
   def show
+    @template_profile = TemplateProfile.first
+  end
+
+  def checklist
+    template_profile = @tax_return.return_workspace&.template_profile || TemplateProfile.first
+    ReturnWorkspaceGenerator.call(tax_return: @tax_return, template_profile: template_profile) if template_profile
+
+    @template_profile = template_profile
+    @checklist = TemplateChecklistService.new(@tax_return).call
+  end
+
+  def worksheet
+    template_profile = @tax_return.return_workspace&.template_profile || TemplateProfile.first
+    ReturnWorkspaceGenerator.call(tax_return: @tax_return, template_profile: template_profile) if template_profile
+
+    @worksheet = WorksheetDataService.new(@tax_return).call
   end
 
   def update_calculator_settings

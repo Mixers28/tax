@@ -7,6 +7,7 @@
       </div>
       <div class="header-actions">
         <span class="user-info">Logged in as: <strong><%= current_user.email %></strong></span>
+        <%= link_to "Template Profile", template_profile_path, class: "btn btn-secondary" %>
         <%= link_to "Logout", logout_path, method: :delete, class: "btn btn-secondary" %>
       </div>
     </div>

@@ -1,5 +1,6 @@
 require_relative 'pdf_export_service'
 require_relative 'json_export_service'
+require_relative 'worksheet_pdf_service'
 
 class ExportService
   def initialize(tax_return, user, format = "both")
@@ -44,7 +45,7 @@ class ExportService
     # Generate PDF if requested
     if @export.pdf?
       begin
-        pdf_path = PDFExportService.new(@tax_return, @export).generate
+        pdf_path = WorksheetPdfService.new(@tax_return, @export).generate
         @export.update!(file_path: pdf_path)
       rescue => e
         Rails.logger.error("PDF Export failed: #{e.message}\n#{e.backtrace.join("\n")}")
@@ -54,7 +55,7 @@ class ExportService
     # Generate JSON if requested
     if @export.json?
       begin
-        json_path = JSONExportService.new(@tax_return, @export).generate
+        json_path = JsonExportService.new(@tax_return, @export).generate
         @export.update!(json_path: json_path)
       rescue => e
         Rails.logger.error("JSON Export failed: #{e.message}\n#{e.backtrace.join("\n")}")
@@ -141,6 +142,18 @@ class ExportService
             # Phase 5d: Married Couple's Allowance
             { label: "Married Couple's Allowance", value: liability.married_couples_allowance_amount },
             { label: "MCA Tax Relief (10%)", value: liability.married_couples_allowance_relief },
+            # Phase 5e: Investment Income
+            { label: "Dividend Income (Gross)", value: liability.dividend_income_gross },
+            { label: "Dividend Allowance", value: liability.dividend_allowance_amount },
+            { label: "Dividend Income (Taxable)", value: liability.dividend_income_taxable },
+            { label: "Savings Interest (Gross)", value: liability.savings_interest_gross },
+            { label: "Personal Savings Allowance", value: liability.savings_allowance_amount },
+            { label: "Savings Interest (Taxable)", value: liability.savings_interest_taxable },
+            { label: "Dividend Tax (Basic Rate)", value: liability.dividend_basic_rate_tax },
+            { label: "Dividend Tax (Higher Rate)", value: liability.dividend_higher_rate_tax },
+            { label: "Dividend Tax (Additional Rate)", value: liability.dividend_additional_rate_tax },
+            { label: "Total Dividend Tax", value: liability.total_dividend_tax },
+            { label: "Savings Interest Tax", value: liability.savings_interest_tax },
             { label: "Total Tax & NI", value: liability.total_tax_and_ni },
             { label: "Tax Paid at Source", value: liability.tax_paid_at_source },
             { label: "Net Liability", value: liability.net_liability }

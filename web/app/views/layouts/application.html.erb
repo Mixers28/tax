@@ -25,5 +25,181 @@
 
   <body>
     <%= yield %>
+    <button type="button" class="theme-toggle" data-theme-toggle>Theme: Auto</button>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --paper: #f7f4ee;
+        --paper-alt: #fbfaf6;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --accent: #0f4c5c;
+        --accent-strong: #0b3742;
+        --border: #e2e8f0;
+        --shadow: rgba(15, 23, 42, 0.06);
+      }
+
+      body {
+        background-color: var(--paper);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+      }
+
+      .container {
+        background-color: var(--paper);
+        background-image:
+          linear-gradient(90deg, rgba(15, 76, 92, 0.05) 0, rgba(15, 76, 92, 0.05) 1px, transparent 1px),
+          repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(15, 76, 92, 0.04) 31px, rgba(15, 76, 92, 0.04) 32px);
+        background-size: 96px 100%, 100% 32px;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #0f172a 0%, #0b1f2a 100%);
+        color: #f8fafc;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+      }
+
+      .section,
+      .summary-card,
+      .field-card,
+      .card,
+      .empty-state,
+      .alert-banner,
+      .notice-banner {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: none;
+      }
+
+      .text-input,
+      .text-area,
+      select,
+      input[type="text"],
+      input[type="number"],
+      input[type="date"],
+      textarea {
+        background: var(--paper-alt);
+        color: var(--ink);
+        border: 1px solid var(--border);
+      }
+
+      .text-input:focus,
+      .text-area:focus,
+      select:focus,
+      input:focus,
+      textarea:focus {
+        outline: 2px solid rgba(15, 76, 92, 0.2);
+        border-color: var(--accent);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-strong);
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1000;
+        border: 1px solid rgba(248, 250, 252, 0.35);
+        background: rgba(15, 23, 42, 0.78);
+        color: #f8fafc;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
+      @media print {
+        .theme-toggle {
+          display: none;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #0b1116;
+          --paper-alt: #0f172a;
+          --card: #0f172a;
+          --ink: #e5e7eb;
+          --muted: #9ca3af;
+          --accent: #2dd4bf;
+          --accent-strong: #14b8a6;
+          --border: #1f2937;
+          --shadow: rgba(0, 0, 0, 0.35);
+        }
+      }
+
+      html[data-theme="dark"] {
+        --paper: #0b1116;
+        --paper-alt: #0f172a;
+        --card: #0f172a;
+        --ink: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #2dd4bf;
+        --accent-strong: #14b8a6;
+        --border: #1f2937;
+        --shadow: rgba(0, 0, 0, 0.35);
+      }
+
+      html[data-theme="dark"] .header {
+        background: linear-gradient(135deg, #0b141b 0%, #0b1f2a 100%);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      }
+
+      html[data-theme="dark"] .theme-toggle {
+        background: rgba(8, 15, 25, 0.8);
+        border-color: rgba(229, 231, 235, 0.2);
+      }
+
+      html[data-theme="light"] {
+        --paper: #f7f4ee;
+        --paper-alt: #fbfaf6;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --accent: #0f4c5c;
+        --accent-strong: #0b3742;
+        --border: #e2e8f0;
+        --shadow: rgba(15, 23, 42, 0.06);
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const themeButton = document.querySelector("[data-theme-toggle]");
+        const themeKey = "theme";
+        const themeOrder = ["auto", "dark", "light"];
+
+        if (!themeButton) {
+          return;
+        }
+
+        const normalizeTheme = (value) => (themeOrder.includes(value) ? value : "auto");
+        const applyTheme = (value) => {
+          const theme = normalizeTheme(value);
+          if (theme === "auto") {
+            document.documentElement.removeAttribute("data-theme");
+          } else {
+            document.documentElement.setAttribute("data-theme", theme);
+          }
+          themeButton.textContent = `Theme: ${theme.charAt(0).toUpperCase()}${theme.slice(1)}`;
+        };
+
+        applyTheme(localStorage.getItem(themeKey));
+
+        themeButton.addEventListener("click", () => {
+          const current = normalizeTheme(localStorage.getItem(themeKey));
+          const next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
+          localStorage.setItem(themeKey, next);
+          applyTheme(next);
+        });
+      });
+    </script>
   </body>
 </html>

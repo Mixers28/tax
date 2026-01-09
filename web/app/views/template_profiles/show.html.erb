@@ -1,0 +1,509 @@
+<div class="container">
+  <div class="template-profile-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Returns", tax_returns_path %>
+      </div>
+      <h1>Template Profile</h1>
+      <p class="subtitle">Manage required fields for new returns</p>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="notice-banner"><%= flash[:notice] %></div>
+    <% elsif flash[:alert] %>
+      <div class="alert-banner"><%= flash[:alert] %></div>
+    <% end %>
+
+    <% total_fields = @template_fields.size %>
+    <% required_count = @template_fields.count(&:required?) %>
+    <% custom_count = @template_fields.count { |field| field.box_definition_id.blank? } %>
+    <% hmrc_count = total_fields - custom_count %>
+
+    <div class="profile-summary">
+      <div class="summary-card">
+        <span class="summary-label">Fields</span>
+        <span class="summary-value"><%= total_fields %></span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Required</span>
+        <span class="summary-value"><%= required_count %></span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">HMRC Boxes</span>
+        <span class="summary-value"><%= hmrc_count %></span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Custom</span>
+        <span class="summary-value"><%= custom_count %></span>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="section">
+        <h2>Profile Details</h2>
+        <p class="helper-text">Update the name and description that appear in workspace setup.</p>
+        <%= form_with model: @template_profile, url: template_profile_path, method: :patch, local: true do |form| %>
+          <div class="form-row">
+            <%= form.label :name, "Profile Name" %>
+            <%= form.text_field :name, required: true, class: "text-input" %>
+          </div>
+          <div class="form-row">
+            <%= form.label :description, "Description" %>
+            <%= form.text_area :description, rows: 3, class: "text-area" %>
+          </div>
+          <div class="form-actions">
+            <%= form.submit "Update Profile", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="section">
+        <h2>Add Template Field</h2>
+        <p class="helper-text">Choose an HMRC box or leave it blank to create a custom line item.</p>
+        <%= form_with model: @template_field, url: template_profile_fields_path, local: true do |form| %>
+          <div class="form-grid">
+            <div class="form-row">
+              <%= form.label :box_definition_id, "HMRC Box (optional)" %>
+              <%= form.collection_select :box_definition_id, @box_definitions, :id, :display_label, { include_blank: "Custom field" }, class: "text-input" %>
+            </div>
+            <div class="form-row">
+              <%= form.label :label, "Custom Label" %>
+              <%= form.text_field :label, class: "text-input", placeholder: "e.g. Other income note" %>
+              <span class="helper-text">Leave blank to use the HMRC box label.</span>
+            </div>
+            <div class="form-row">
+              <%= form.label :data_type, "Data Type" %>
+              <%= form.select :data_type, [["Text", "text"], ["Number", "number"], ["Currency", "currency"], ["Date", "date"], ["Boolean", "boolean"]], {}, class: "text-input" %>
+            </div>
+            <div class="form-row">
+              <%= form.label :position, "Position" %>
+              <%= form.number_field :position, class: "text-input", min: 1, placeholder: "e.g. 10" %>
+              <span class="helper-text">Lower numbers appear first.</span>
+            </div>
+            <div class="form-row checkbox-row">
+              <%= form.check_box :required, class: "checkbox-input" %>
+              <%= form.label :required, "Required" %>
+            </div>
+          </div>
+          <div class="form-actions">
+            <%= form.submit "Add Field", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Current Fields</h2>
+      <% if @template_fields.any? %>
+        <div class="filter-bar">
+          <input type="search" id="field-filter" class="text-input" placeholder="Search by form, page, box, or label">
+          <label class="filter-toggle">
+            <input type="checkbox" id="filter-required">
+            Required only
+          </label>
+          <label class="filter-toggle">
+            <input type="checkbox" id="filter-custom">
+            Custom only
+          </label>
+        </div>
+        <div class="fields-list">
+          <% @template_fields.each do |field| %>
+            <% form_code = field.box_definition&.page_definition&.form_definition&.code %>
+            <% page_code = field.box_definition&.page_definition&.page_code %>
+            <% search_text = [form_code, page_code, field.box_definition&.box_code, field.label.presence || field.box_definition&.hmrc_label].compact.join(" ").downcase %>
+            <div class="field-card" data-search="<%= search_text %>" data-required="<%= field.required %>" data-custom="<%= field.box_definition_id.blank? %>">
+              <div class="field-meta">
+                <div class="field-title">
+                  <strong><%= field.box_definition&.box_code || "Custom" %></strong>
+                  <span class="field-label"><%= field.label.presence || field.box_definition&.hmrc_label %></span>
+                </div>
+                <div class="field-tags">
+                  <% if form_code.present? || page_code.present? %>
+                    <span class="tag tag-outline"><%= [form_code, page_code].compact.join(" / ") %></span>
+                  <% else %>
+                    <span class="tag tag-outline">Custom</span>
+                  <% end %>
+                  <span class="tag"><%= field.data_type %></span>
+                  <% if field.required %>
+                    <span class="tag tag-required">required</span>
+                  <% end %>
+                  <% if field.position.present? %>
+                    <span class="tag tag-muted">pos <%= field.position %></span>
+                  <% end %>
+                </div>
+              </div>
+              <div class="field-actions">
+                <%= form_with model: field, url: template_profile_field_path(field), method: :patch, local: true, class: "inline-form" do |form| %>
+                  <div class="inline-grid">
+                    <%= form.collection_select :box_definition_id, @box_definitions, :id, :display_label, { include_blank: "Custom field", selected: field.box_definition_id }, class: "text-input" %>
+                    <%= form.text_field :label, class: "text-input", placeholder: "Label" %>
+                    <%= form.select :data_type, [["Text", "text"], ["Number", "number"], ["Currency", "currency"], ["Date", "date"], ["Boolean", "boolean"]], {}, class: "text-input" %>
+                    <%= form.number_field :position, class: "text-input", placeholder: "Pos" %>
+                    <div class="checkbox-row">
+                      <%= form.check_box :required, class: "checkbox-input" %>
+                      <%= form.label :required, "Required" %>
+                    </div>
+                    <%= form.submit "Update", class: "btn btn-secondary" %>
+                  </div>
+                <% end %>
+                <%= button_to "Delete", template_profile_field_path(field), method: :delete, class: "btn btn-danger", form_class: "inline-form", data: { confirm: "Delete this template field?" } %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="empty-text">No template fields yet. Add your first field above.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    color-scheme: light dark;
+    --paper: #f7f4ee;
+    --paper-alt: #fbfaf6;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --accent: #0f4c5c;
+    --accent-strong: #0b3742;
+    --accent-soft: #e7f3f2;
+    --border: #e2e8f0;
+    --shadow: rgba(15, 23, 42, 0.06);
+  }
+
+  .container {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(90deg, rgba(15, 76, 92, 0.05) 0, rgba(15, 76, 92, 0.05) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(15, 76, 92, 0.04) 31px, rgba(15, 76, 92, 0.04) 32px);
+    background-size: 96px 100%, 100% 32px;
+    min-height: 100vh;
+    padding: 1rem;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  }
+
+  .template-profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #0b1f2a 100%);
+    color: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    position: relative;
+  }
+
+  .header h1 {
+    font-family: "Source Serif 4", "Times New Roman", serif;
+    letter-spacing: 0.3px;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+  }
+
+  .subtitle {
+    opacity: 0.9;
+    margin-top: 0.5rem;
+  }
+
+  .section {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .profile-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .summary-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .summary-value {
+    display: block;
+    font-size: 1.6rem;
+    margin-top: 0.3rem;
+    font-weight: 600;
+  }
+
+  .helper-text {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  .form-row {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .text-input,
+  .text-area {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--paper-alt);
+    font-family: inherit;
+  }
+
+  .text-input:focus,
+  .text-area:focus {
+    outline: 2px solid rgba(15, 76, 92, 0.25);
+    border-color: var(--accent);
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-actions {
+    margin-top: 1rem;
+  }
+
+  .btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+
+  .btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+  }
+
+  .notice-banner {
+    background: #dbeafe;
+    color: #1e3a8a;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-banner {
+    background: #fee2e2;
+    color: #7f1d1d;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .filter-bar {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .filter-toggle {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .fields-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .field-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--card);
+  }
+
+  .field-meta {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .field-title {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .field-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .field-tags {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .tag {
+    background: #e5e7eb;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .tag-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .tag-required {
+    background: #fde68a;
+  }
+
+  .tag-muted {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .inline-form {
+    margin-bottom: 0.75rem;
+  }
+
+  .inline-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    align-items: center;
+  }
+
+  .empty-text {
+    color: var(--muted);
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      padding: 1.5rem;
+    }
+    .filter-bar {
+      grid-template-columns: 1fr;
+    }
+  }
+
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const themeButtons = Array.from(document.querySelectorAll("[data-theme-toggle]"));
+    const themeKey = "theme";
+    const themeOrder = ["auto", "dark", "light"];
+
+    const normalizeTheme = (value) => (themeOrder.includes(value) ? value : "auto");
+    const applyTheme = (value) => {
+      const theme = normalizeTheme(value);
+      if (theme === "auto") {
+        document.documentElement.removeAttribute("data-theme");
+      } else {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+      themeButtons.forEach((button) => {
+        button.textContent = `Theme: ${theme.charAt(0).toUpperCase()}${theme.slice(1)}`;
+      });
+    };
+
+    applyTheme(localStorage.getItem(themeKey));
+
+    themeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = normalizeTheme(localStorage.getItem(themeKey));
+        const next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
+        localStorage.setItem(themeKey, next);
+        applyTheme(next);
+      });
+    });
+
+    const filterInput = document.getElementById("field-filter");
+    const requiredOnly = document.getElementById("filter-required");
+    const customOnly = document.getElementById("filter-custom");
+    const cards = Array.from(document.querySelectorAll(".field-card"));
+
+    if (filterInput && cards.length > 0) {
+      const applyFilter = () => {
+        const query = filterInput.value.toLowerCase().trim();
+        const required = requiredOnly && requiredOnly.checked;
+        const custom = customOnly && customOnly.checked;
+
+        cards.forEach((card) => {
+          const haystack = card.dataset.search || "";
+          const isRequired = card.dataset.required === "true";
+          const isCustom = card.dataset.custom === "true";
+
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesRequired = !required || isRequired;
+          const matchesCustom = !custom || isCustom;
+
+          card.style.display = matchesQuery && matchesRequired && matchesCustom ? "" : "none";
+        });
+      };
+
+      [filterInput, requiredOnly, customOnly].forEach((element) => {
+        if (element) {
+          element.addEventListener("input", applyFilter);
+          element.addEventListener("change", applyFilter);
+        }
+      });
+    }
+  });
+</script>

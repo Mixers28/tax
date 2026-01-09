@@ -3,6 +3,8 @@ class BoxValue < ApplicationRecord
   belongs_to :box_definition
   has_many :evidence_box_values, dependent: :destroy
   has_many :evidences, through: :evidence_box_values
+  has_many :evidence_links, as: :linkable, dependent: :destroy
+  has_one :fx_provenance, as: :provenanceable, dependent: :destroy
   has_many :box_validations, dependent: :destroy
   has_many :validation_rules, through: :box_validations
 

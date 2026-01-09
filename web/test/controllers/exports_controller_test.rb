@@ -149,6 +149,6 @@ class ExportsControllerTest < ActionDispatch::IntegrationTest
   def stub_export_services
     allow_any_instance_of(ExportService).to receive(:generate!).and_call_original
     allow_any_instance_of(PDFExportService).to receive(:generate).and_return("/tmp/test.pdf")
-    allow_any_instance_of(JSONExportService).to receive(:generate).and_return("/tmp/test.json")
+    allow_any_instance_of(JsonExportService).to receive(:generate).and_return("/tmp/test.json")
   end
 end

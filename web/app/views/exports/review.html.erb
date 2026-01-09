@@ -255,6 +255,7 @@
 
           <div class="export-actions">
             <%= f.submit "Generate Export", class: "btn btn-primary btn-lg" %>
+            <%= link_to "View Worksheet (HTML)", worksheet_tax_return_path(@tax_return), class: "btn btn-secondary" %>
             <%= link_to "Back", tax_return_path(@tax_return), class: "btn btn-secondary" %>
           </div>
         <% end %>

@@ -38,6 +38,323 @@
 
 ## Recent Sessions (last 3-5)
 
+### 2026-01-09 (Session 19 - Stage 10 Schedules + TR7)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 10 schedules/TR7**
+  - Added SA106 F6 schedule table to worksheet output
+  - Generated TR7 cross-reference note when SA106 F6 entries exist
+  - Updated docs to reflect Phase 1b completion
+
+### Files touched
+- web/app/services/worksheet_data_service.rb (MODIFIED - schedules/TR7)
+- web/app/views/tax_returns/worksheet.html.erb (MODIFIED - schedule table + note)
+- docs/NOW.md (UPDATED - Phase 1b complete)
+- docs/PROJECT_CONTEXT.md (UPDATED - Phase 1b complete)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - remaining drift)
+
+### 2026-01-09 (Session 18 - Stage 9 FX Provenance)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 9 FX provenance**
+  - Allowed FX provenance capture for box values via /returns/:id/boxes
+  - Included box-level FX provenance IDs in JSON export
+  - Updated docs to mark FX provenance complete
+
+### Files touched
+- web/app/controllers/boxes_controller.rb (MODIFIED - FX provenance sync)
+- web/app/services/json_export_service.rb (MODIFIED - FX provenance IDs)
+- web/test/controllers/boxes_controller_test.rb (MODIFIED - FX provenance test)
+- docs/NOW.md (UPDATED - FX provenance complete)
+- docs/PROJECT_CONTEXT.md (UPDATED - FX provenance status)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - FX provenance status)
+
+### 2026-01-09 (Session 17 - Stage 8 PDF from HTML)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 8 PDF from HTML**
+  - Ensured wkhtmltopdf renders using print media styles and local file access
+  - Updated docs to mark HTML->PDF worksheet completion
+
+### Files touched
+- web/app/services/worksheet_pdf_service.rb (MODIFIED - wkhtmltopdf flags)
+- docs/NOW.md (UPDATED - stage 8 complete)
+- docs/PROJECT_CONTEXT.md (UPDATED - worksheet PDF status)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - PDF status)
+
+### 2026-01-09 (Session 14 - Stage 6 Completion)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 6 finalization**
+  - Added boxes controller tests covering spec compatibility
+  - Updated NOW and PROJECT_CONTEXT to mark API reconciliation complete
+
+### Files touched
+- web/test/controllers/boxes_controller_test.rb (NEW)
+- docs/NOW.md (UPDATED - stage 6 complete)
+- docs/PROJECT_CONTEXT.md (UPDATED - stage 6 complete)
+
+### Outcomes / Decisions
+- API surface reconciliation marked complete; legacy and spec routes coexist.
+
+### 2026-01-09 (Session 15 - Worksheet Evidence Annotations)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 7 worksheet annotations**
+  - Added evidence and FX provenance columns to worksheet HTML
+  - Extended worksheet data service to pull evidence links and FX provenance
+  - Updated docs to reflect worksheet annotation status
+
+### Files touched
+- web/app/services/worksheet_data_service.rb (MODIFIED - evidence/FX data)
+- web/app/views/tax_returns/worksheet.html.erb (MODIFIED - evidence/FX columns)
+- docs/NOW.md (UPDATED - worksheet annotations)
+- docs/PROJECT_CONTEXT.md (UPDATED - worksheet annotations)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - worksheet acceptance criteria)
+
+### 2026-01-09 (Session 16 - PDF Evidence Annotations)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 7 PDF annotations**
+  - Added evidence and FX provenance annotations to the Prawn PDF fallback
+  - Updated docs to reflect PDF annotation coverage
+
+### Files touched
+- web/app/services/pdf_export_service.rb (MODIFIED - evidence/FX annotations)
+- docs/NOW.md (UPDATED - PDF annotations)
+- docs/PROJECT_CONTEXT.md (UPDATED - export annotations)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - export criteria)
+
+### 2026-01-09 (Session 13 - API Surface Reconciliation)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Stage 6 API reconciliation**
+  - Added spec-compatible routes for evidence/returns/checklist/worksheet/export/boxes
+  - Implemented BoxesController for /returns/:id/boxes endpoints
+  - Added legacy export handler for /returns/:id/export
+  - Updated spec and drift analysis to document route aliases
+
+### Files touched
+- web/config/routes.rb (MODIFIED - compatibility routes)
+- web/app/controllers/boxes_controller.rb (NEW)
+- web/app/controllers/exports_controller.rb (MODIFIED - legacy_export + id fallback)
+- docs/spec.md (UPDATED - legacy route aliases)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - API alignment)
+- docs/NOW.md (UPDATED - stage 6 progress)
+- docs/PROJECT_CONTEXT.md (UPDATED - stage 6 progress)
+
+### Outcomes / Decisions
+- Spec API endpoints are now supported via aliases while preserving existing UI routes.
+
+### 2026-01-09 (Session 12 - FX Provenance + Evidence Links)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 1b evidence linking + FX provenance**
+  - Added EvidenceLink and FxProvenance models with polymorphic associations
+  - Added field value UI for evidence linking and FX provenance capture
+  - Updated checklist to use evidence links for field values
+  - Extended JSON export to include template fields and FX provenance
+
+### Files touched
+- web/db/migrate/20260107000005_create_evidence_links.rb (NEW)
+- web/db/migrate/20260107000006_create_fx_provenances.rb (NEW)
+- web/app/models/evidence_link.rb (NEW)
+- web/app/models/fx_provenance.rb (NEW)
+- web/app/controllers/field_values_controller.rb (NEW)
+- web/app/views/field_values/index.html.erb (NEW)
+- web/app/models/evidence.rb (MODIFIED - evidence_links association)
+- web/app/models/field_value.rb (MODIFIED - evidence_links + fx_provenance)
+- web/app/models/box_value.rb (MODIFIED - evidence_links + fx_provenance)
+- web/app/services/template_checklist_service.rb (MODIFIED - evidence links)
+- web/app/services/json_export_service.rb (MODIFIED - template fields + FX provenance)
+- web/config/routes.rb (MODIFIED - field_values routes)
+- web/app/views/tax_returns/show.html.erb (MODIFIED - workspace fields link)
+- web/test/controllers/field_values_controller_test.rb (NEW)
+- docs/NOW.md (UPDATED - FX provenance progress)
+- docs/PROJECT_CONTEXT.md (UPDATED - FX provenance progress)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - FX provenance status)
+
+### Outcomes / Decisions
+- Field-level evidence links and FX provenance capture are available; worksheet/PDF annotations still pending.
+
+### 2026-01-09 (Session 11 - Worksheet Export)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 1b worksheet export (HTML + PDF)**
+  - Added worksheet HTML endpoint and view grouped by form/page/box
+  - Added WorksheetDataService and WorksheetExportService for HTML generation
+  - Added WorksheetPdfService to render PDF via wkhtmltopdf with Prawn fallback
+  - Linked worksheet access from export review
+
+### Files touched
+- web/app/services/worksheet_data_service.rb (NEW)
+- web/app/services/worksheet_export_service.rb (NEW)
+- web/app/services/worksheet_pdf_service.rb (NEW)
+- web/app/views/tax_returns/worksheet.html.erb (NEW)
+- web/app/views/exports/review.html.erb (MODIFIED - worksheet link)
+- web/app/controllers/tax_returns_controller.rb (MODIFIED - worksheet action)
+- web/config/routes.rb (MODIFIED - worksheet route)
+- web/app/services/export_service.rb (MODIFIED - PDF via worksheet)
+- web/test/controllers/tax_returns_worksheet_test.rb (NEW)
+- docs/NOW.md (UPDATED - worksheet progress)
+- docs/PROJECT_CONTEXT.md (UPDATED - worksheet progress)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - worksheet status)
+
+### Outcomes / Decisions
+- HTML worksheet export is available; PDF generation prefers wkhtmltopdf when present.
+
+### 2026-01-09 (Session 10 - Phase 1b Checklist)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 1b checklist implementation**
+  - Added checklist endpoint and UI for template fields
+  - Implemented TemplateChecklistService for missing value/confirmation/evidence status
+  - Wired checklist access into TaxReturn quick actions
+
+### Files touched
+- web/app/services/template_checklist_service.rb (NEW)
+- web/app/views/tax_returns/checklist.html.erb (NEW)
+- web/app/views/tax_returns/show.html.erb (MODIFIED - checklist link)
+- web/app/controllers/tax_returns_controller.rb (MODIFIED - checklist action)
+- web/config/routes.rb (MODIFIED - checklist route)
+- web/test/controllers/tax_returns_checklist_test.rb (NEW)
+- docs/NOW.md (UPDATED - checklist progress)
+- docs/PROJECT_CONTEXT.md (UPDATED - checklist progress)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - checklist status)
+
+### Outcomes / Decisions
+- Checklist is available and tied to template fields; evidence linking still pending.
+
+### 2026-01-07 (Session 9 - Phase 1b Admin UI + Generator)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 1b alignment: admin UI + workspace generator**
+  - Added TemplateProfilesController and TemplateFieldsController with singular routes
+  - Built admin UI for template profile and template fields
+  - Added ReturnWorkspaceGenerator and wired TaxReturn creation to generate workspaces
+  - Updated docs to reflect Phase 1b progress
+
+### Files touched
+- web/app/controllers/template_profiles_controller.rb (NEW)
+- web/app/controllers/template_fields_controller.rb (NEW)
+- web/app/services/return_workspace_generator.rb (NEW)
+- web/app/views/template_profiles/new.html.erb (NEW)
+- web/app/views/template_profiles/show.html.erb (NEW)
+- web/app/views/tax_returns/index.html.erb (MODIFIED - add Template Profile link)
+- web/app/controllers/tax_returns_controller.rb (MODIFIED - workspace generator call)
+- web/config/routes.rb (MODIFIED - template_profile routes)
+- docs/NOW.md (UPDATED - Phase 1b progress)
+- docs/PROJECT_CONTEXT.md (UPDATED - Phase 1b progress)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - alignment status)
+
+### Outcomes / Decisions
+- Template profile admin UI and return workspace generator are now present.
+- Checklist, worksheet export, and FX provenance remain pending.
+
+### 2026-01-07 (Session 8 - Phase 1b Scaffolding)
+
+**Participants:** User, Codex CLI Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 1b scaffolding to align build with SPEC.md**
+  - Added TemplateProfile, TemplateField, ReturnWorkspace, and FieldValue data models with migrations
+  - Linked TaxReturn to ReturnWorkspace
+  - Updated project documentation to reflect Phase 1b scaffolding and remaining gaps
+
+### Files touched
+- web/db/migrate/20260107000000_create_template_profiles.rb (NEW)
+- web/db/migrate/20260107000001_create_template_fields.rb (NEW)
+- web/db/migrate/20260107000002_create_return_workspaces.rb (NEW)
+- web/db/migrate/20260107000003_create_field_values.rb (NEW)
+- web/app/models/template_profile.rb (NEW)
+- web/app/models/template_field.rb (NEW)
+- web/app/models/return_workspace.rb (NEW)
+- web/app/models/field_value.rb (NEW)
+- web/app/models/tax_return.rb (MODIFIED - added return_workspace association)
+- docs/NOW.md (UPDATED - Phase 1b focus)
+- docs/PROJECT_CONTEXT.md (UPDATED - Phase 1b scaffolding noted)
+- SPEC_DRIFT_ANALYSIS.md (UPDATED - partial alignment)
+
+### Outcomes / Decisions
+- Phase 1b data model scaffolding is in place.
+- Admin UI, workspace generator, checklist, worksheet export, and FX provenance remain pending.
+
+### 2026-01-06 (Session 7 - Phase 5e: Investment Income Tax)
+
+**Participants:** User, Claude Code Agent
+**Branch:** main
+
+### What we worked on
+- **Phase 5e: Investment Income Tax - Complete Implementation**
+  - Implemented dividend and savings interest tax calculations following HMRC's required income taxation order
+  - Created DividendAllowanceCalculator: Applies £500 tax-free dividend allowance with special dividend tax rates (8.75% basic, 33.75% higher, 39.35% additional)
+  - Created SavingsAllowanceCalculator: Applies Personal Savings Allowance (PSA) amounts based on marginal tax rate determined from non-savings income (£1,000 basic rate, £500 higher rate, £0 additional rate)
+  - Created InvestmentIncomeTaxCalculator: Complex tax band allocation logic that correctly places savings and dividends in remaining band space after non-savings income fills bands
+  - Extended IncomeAggregator: Added aggregation methods for pension_contribution, gift_aid_donation, rental_property, dividends, and interest to include all income sources in total gross income
+  - Updated TaxLiabilityOrchestrator: Integrated Phase 5e calculators after Phase 5d (lines 88-113), calls dividend allowance → savings allowance → investment income tax in correct order, adds all results to TaxLiability.update!
+  - Database migration: Created AddPhase5eInvestmentIncomeToTaxLiabilities migration adding 11 fields (dividend_income_gross, dividend_allowance_amount, dividend_income_taxable, savings_interest_gross, savings_allowance_amount, savings_interest_taxable, dividend_basic_rate_tax, dividend_higher_rate_tax, dividend_additional_rate_tax, total_dividend_tax, savings_interest_tax) all with precision 12,2
+  - TaxLiability model: Updated summary() method to include all 11 Phase 5e investment income fields
+  - ExportService: Added 13 new calculation steps to export breakdown (dividend income gross/allowance/taxable, savings interest gross/allowance/taxable, dividend tax by band, total dividend tax, savings interest tax) bringing total to 42+ calculation steps
+  - Non-breaking design: Investment income calculated automatically when users add dividend or interest IncomeSource records; uses existing IncomeSource enum types; zero impact if no investment income present
+
+### Files touched
+- web/db/migrate/20260106030000_add_phase_5e_investment_income_to_tax_liabilities.rb (NEW)
+- web/app/services/tax_calculations/dividend_allowance_calculator.rb (NEW)
+- web/app/services/tax_calculations/savings_allowance_calculator.rb (NEW)
+- web/app/services/tax_calculations/investment_income_tax_calculator.rb (NEW)
+- web/app/services/tax_calculations/income_aggregator.rb (MODIFIED - added 5 new income source aggregation methods)
+- web/app/services/tax_calculations/tax_liability_orchestrator.rb (MODIFIED - integrated Phase 5e calculators, updated TaxLiability.update! call)
+- web/app/models/tax_liability.rb (MODIFIED - updated summary method with Phase 5e fields)
+- web/app/services/export_service.rb (MODIFIED - added 13 Phase 5e calculation steps)
+- docs/NOW.md (UPDATED - Phase 5e completion summary)
+- docs/PROJECT_CONTEXT.md (UPDATED - Phase 5e in summary and changelog)
+- docs/SESSION_NOTES.md (THIS ENTRY)
+
+### Outcomes / Decisions
+- Phase 5e implementation complete: All investment income tax features fully integrated
+- Architecture consistency: Followed existing Phase 5a-5d patterns (calculator services → orchestrator integration)
+- Non-breaking changes: All Phase 5e functionality is automatic and additive; existing Phase 5a-5d logic completely unchanged
+- Tax calculation order: Correctly implements HMRC requirement that non-savings income fills bands first, then savings (after PSA), then dividends (after allowance)
+- Special tax rates: Dividend tax rates (8.75%/33.75%/39.35%) correctly applied distinct from standard income tax rates
+- Ready for: Phase 6 (multi-year returns), HMRC filing integration, or production deployment
+- All Phase 5a-5e features now fully integrated into unified export with 42+ calculation step breakdown
+
+---
+
 ### 2026-01-06 (Session 6 - Export Calculation Debug & Fix)
 
 **Participants:** User, Claude Code Agent

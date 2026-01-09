@@ -20,8 +20,25 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "tax_returns#index"
 
+  # Spec compatibility routes
+  post "evidence", to: "evidences#create"
+  get "evidence/:id", to: "evidences#show"
+  post "evidence/:evidence_id/extract", to: "extraction_runs#create"
+  get "evidence/:id/extract", to: "evidences#show"
+  get "returns/:id/boxes", to: "boxes#index"
+  patch "returns/:id/boxes/:box_definition_id", to: "boxes#update"
+  get "returns/:id/checklist", to: "tax_returns#checklist"
+  get "returns/:id/worksheet", to: "tax_returns#worksheet"
+  get "returns/:id/export", to: "exports#legacy_export"
+
+  resource :template_profile, only: [:show, :new, :create, :update] do
+    resources :fields, controller: "template_fields", only: [:create, :update, :destroy]
+  end
+
   resources :tax_returns, only: [:index, :create, :show] do
     member do
+      get :checklist
+      get :worksheet
       patch :update_calculator_settings
       patch :toggle_blind_person
       # Phase 5d: Tax Reliefs
@@ -33,6 +50,7 @@ Rails.application.routes.draw do
     resources :income_sources, only: [:index, :new, :create, :edit, :update, :destroy]
     resources :pension_contributions, only: [:index, :new, :create, :edit, :update, :destroy]
     resources :gift_aid_donations, only: [:index, :new, :create, :edit, :update, :destroy]
+    resources :field_values, only: [:index, :update]
 
     resources :exports, only: [:index, :create, :show] do
       collection do

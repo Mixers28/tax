@@ -1,42 +1,36 @@
-# Specification Drift Analysis (2026-01-05)
+# Specification Drift Analysis (2026-01-05, updated after spec merge)
 
-> Comprehensive review of spec.md vs current build to identify alignment and drift.
+> Review of docs/spec.md vs current build after incorporating docs/dif.md.
 
 ---
 
 ## Executive Summary
 
-**Overall Status:** Mostly aligned with minor drift in API routes and some enhancements not in spec.
+**Overall Status:** Mostly aligned; remaining drift is documentation of HMRC calculation sources.
 
-- ✅ All 4 phases completed as planned
-- ✅ Core architecture implemented correctly
-- ✅ All major acceptance criteria met
-- ⚠️ Some API routes differ from spec (RESTful implementation vs spec design)
-- ✅ Additional features implemented (calculators, validations, review page)
+- ✅ Core offline architecture, encryption, and local LLM extraction remain aligned.
+- ✅ Deterministic calculations exist (full engine still in scope).
+- ✅ Template Profile + Return Workspace are implemented (admin UI + generator + field input + checklist + worksheet).
+- ✅ Printable worksheet (HTML first) + PDF derived from HTML (wkhtmltopdf in production; Prawn fallback).
+- ✅ Missing-items checklist implemented (value/confirmation/evidence status with field/box evidence).
+- ✅ FX provenance + evidence-to-field linking are implemented (field values + boxes; exports include references).
+- ✅ API surface in spec is aligned via compatibility routes (legacy paths preserved).
 
 ---
 
-## 1. Goals Alignment
-
-### Spec Goals
-1. Local-first web app mapping inputs to HMRC SA100/SA102/SA106/SA110 boxes
-2. "Copy to HMRC" worksheet export (PDF + JSON)
-3. Deterministic calculations (ANI, HICBC, FTCR)
-4. Offline PDF data extraction with local LLM
-5. Encryption at rest
-
-### Current Build Status
+## 1. Goals Alignment (Updated Spec)
 
 | Goal | Status | Evidence |
 |------|--------|----------|
-| Local-first web app | ✅ COMPLETE | Rails 8.1 + SQLite, no external calls |
-| Box mapping (SA100/SA102/etc) | ✅ COMPLETE | Box registry, definitions seeded, UI inputs |
-| Worksheet export (PDF + JSON) | ✅ COMPLETE | Phase 4: PDFExportService, JSONExportService |
-| Deterministic calculations | ✅ COMPLETE | FtcrCalculator, GiftAidCalculator, HicbcCalculator |
-| Offline PDF extraction | ✅ COMPLETE | Phase 3: PdfTextExtractionService + Ollama |
-| Encryption at rest | ✅ COMPLETE | EncryptedDiskService, ActiveRecord encryption |
+| Template-driven required-fields set from consultant pack | ✅ COMPLETE | Admin UI + template fields with required rules |
+| Return Workspace per tax year | ✅ COMPLETE | Workspace generator creates FieldValues for new returns |
+| "Copy to HMRC" worksheet export (HTML first, then PDF) | ✅ COMPLETE | HTML worksheet + wkhtmltopdf PDF (Prawn fallback) |
+| Checklist with direct box mapping | ✅ COMPLETE | Checklist endpoint + UI with evidence status |
+| Deterministic calculations based on HMRC docs | ⚠️ PARTIAL | Engine exists; HMRC basis not documented in code/spec |
+| Offline LLM extraction (optional, assistive) | ✅ COMPLETE | PdfTextExtractionService + OllamaExtractionService |
+| Encryption at rest for sensitive data + attachments | ✅ COMPLETE | EncryptedDiskService + ActiveRecord encryption |
 
-**Conclusion:** All goals achieved. ✅
+**Conclusion:** Template-driven requirements are implemented; remaining gap is HMRC calculation source documentation. Core existing functionality remains aligned. ❗
 
 ---
 
@@ -44,315 +38,94 @@
 
 | Constraint | Spec Requirement | Current Build | Status |
 |-----------|-----------------|----------------|--------|
-| **Canonical Schema** | HMRC paper forms 2024-25 | BoxDefinitions seeded from extracted boxes | ✅ |
-| **Data Stays Local** | No outbound network by default | No external calls configured | ✅ |
-| **LLM Extraction** | Offline, opt-in, human-in-loop | Ollama integration with review UI | ✅ |
-| **Evidence Encryption** | Encrypted disk-backed service | EncryptedDiskService implemented | ✅ |
-| **No Personal Data in Repo** | Sanitized seed data | Forms are blank templates | ✅ |
-
-**Conclusion:** All constraints met. ✅
-
----
-
-## 3. Architecture Comparison
-
-### Spec Components
-```
-Box Registry → FormDefinition, PageDefinition, BoxDefinition ✅
-Returns → TaxYear, TaxReturn, BoxValue, AuditLog ✅
-Evidence → Active Storage + Evidence records ✅
-Extraction → Offline LLM service ✅
-Exporter → Worksheet + JSON export ✅
-```
-
-### Current Build Components
-
-#### Implemented ✅
-- **Box Registry**: FormDefinition, PageDefinition, BoxDefinition
-- **Returns**: TaxYear, TaxReturn, BoxValue, AuditLog
-- **Evidence**: Evidence model + Active Storage (encrypted)
-- **Extraction**: PdfTextExtractionService + OllamaExtractionService
-- **Exporter**: PDFExportService + JSONExportService
-- **Authentication**: User model, Sessions controller
-- **Validation**: ValidationService, ValidationRule, BoxValidation models
-- **Calculations**: FtcrCalculator, GiftAidCalculator, HicbcCalculator, TaxCalculation model
-- **Review**: ExportReview controller/view, review.html.erb page
-
-#### Additional (Not in Spec but Useful)
-- ValidationService for rule-based validation
-- TaxCalculation model for storing calculation results
-- ExportEvidence join table for export-evidence linking
-- Review page for previewing before export
-- Calculator settings UI for enabling/disabling specific calculations
-- Export model with validation_state and calculation_results storage
-
-**Conclusion:** Implemented as specified, with useful enhancements. ✅
+| Canonical HMRC schema | 2024-25 forms | BoxDefinitions seeded | ✅ |
+| Data stays local | No outbound calls | Local-only, Ollama on localhost | ✅ |
+| LLM extraction | Optional, human-in-loop | Manual review required | ✅ |
+| Evidence encryption | Encrypted disk | EncryptedDiskService | ✅ |
+| Template profile distinct from registry | Separate required-fields set | Admin UI + generator present | ✅ |
+| Missing-items checklist pre-export | Template-based checklist | Checklist UI present with evidence status | ✅ |
 
 ---
 
-## 4. API Surface Comparison
+## 3. Architecture Drift
 
-### Spec Design
-
+### Spec Components (New)
 ```
-Evidence:
-  POST /evidence (upload)
-  GET /evidence/:id (metadata and links)
-Extraction:
-  POST /evidence/:id/extract (trigger LLM extraction)
-  GET /evidence/:id/extract (candidate results)
-Returns and boxes:
-  GET /returns/:id/boxes
-  PATCH /returns/:id/boxes/:box_definition_id
-Export:
-  GET /returns/:id/export (PDF + JSON)
+TemplateProfile, TemplateField
+ReturnWorkspace, FieldValue
+EvidenceLink, FXProvenance
+Worksheet Export (HTML -> PDF)
+Checklist (template-based)
 ```
 
-### Current Build Routes
+### Current Build
+- Box Registry, Returns, Evidence, Extraction, Exporter (PDF/JSON) are implemented.
+- Template profile + return workspace data models exist with admin UI and generator (TemplateProfile, TemplateField, ReturnWorkspace, FieldValue).
+- Evidence-to-field linking implemented for template field values.
+- FX provenance stored for template fields and box values.
 
-| Spec Route | Current Implementation | Status | Notes |
-|-----------|------------------------|--------|-------|
-| POST /evidence | POST /evidences | ✅ | RESTful pluralization |
-| GET /evidence/:id | GET /evidences/:id | ✅ | RESTful pluralization |
-| POST /evidence/:id/extract | POST /evidences/:id/extraction_runs | ⚠️ | Different verb structure |
-| GET /evidence/:id/extract | GET /evidences/:id/extraction_runs | ⚠️ | Different resource name |
-| GET /returns/:id/boxes | GET /tax_returns/:id/validations | ⚠️ | Different approach (validation UI instead) |
-| PATCH /returns/:id/boxes/:box_id | PATCH /tax_returns/:id/update_calculator_settings | ⚠️ | Settings-based instead |
-| GET /returns/:id/export | GET /tax_returns/:id/exports/review + POST /tax_returns/:id/exports | ⚠️ | Two-step: review then create |
-
-### Route Implementation Details
-
-**Current Route Structure:**
-```ruby
-resources :tax_returns, only: [:index, :create, :show] do
-  member do
-    patch :update_calculator_settings
-  end
-
-  resources :exports, only: [:index, :create, :show] do
-    collection do
-      get :review
-    end
-    member do
-      get :download_pdf
-      get :download_json
-    end
-  end
-
-  resources :validations, only: [:index] do
-    collection do
-      post :run_validation
-    end
-  end
-
-  resources :calculations, only: [:index] do
-    collection do
-      post :calculate_ftcr
-      post :calculate_gift_aid
-      post :calculate_hicbc
-    end
-  end
-end
-
-resources :evidences, only: [:new, :create, :show] do
-  resources :extraction_runs, only: [:create]
-end
-```
-
-**Analysis:**
-- ✅ Pluralization is correct RESTful convention (not in spec but better)
-- ✅ Extraction runs implemented (slightly different naming from spec)
-- ⚠️ Validations and calculations split into separate resources (spec didn't specify these)
-- ✅ Export endpoints match spec intent (review + create + download)
-
-**Conclusion:** Implementation is RESTful-correct and actually improves on spec design. Minor route naming differs from spec. ⚠️ (acceptable drift)
+**Conclusion:** Key new architectural components are present. ✅
 
 ---
 
-## 5. Phase Completion Status
+## 4. API Surface Drift
 
-### Phase 1: Boxes-first Foundation
-**Spec:** Models, migrations, seed pipeline, Docker Compose
-**Current:** ✅ COMPLETE
-- FormDefinition, PageDefinition, BoxDefinition models
-- Seed pipeline from extracted HMRC boxes
-- Docker Compose scaffold (docker-compose.yml + Dockerfile.dev)
-- Database migrations for all core models
+### Spec Endpoints (New/Updated)
+- Template profile:
+  - GET /template_profile
+  - POST/PATCH/DELETE /template_profile/fields
+- Checklist:
+  - GET /returns/:id/checklist
+- Worksheet:
+  - GET /returns/:id/worksheet (HTML)
+  - GET /returns/:id/export (PDF + JSON)
 
-### Phase 2: Encrypted Storage & Evidence
-**Spec:** Active Storage, encrypted disk service, evidence upload UI
-**Current:** ✅ COMPLETE
-- Evidence model with file attachment
-- EncryptedDiskService for encrypted storage
-- Evidence upload UI (evidences/new.html.erb)
-- Metadata capture and validation
-- ActiveRecord encryption for sensitive columns
+### Current Build
+- Template profile endpoints implemented under `/template_profile`.
+- Checklist endpoint implemented under `/returns/:id/checklist` (legacy `/tax_returns/:id/checklist` remains).
+- Worksheet endpoint implemented under `/returns/:id/worksheet` (legacy `/tax_returns/:id/worksheet` remains).
+- Evidence endpoints implemented under `/evidence/:id` (legacy `/evidences/:id` remains).
 
-### Phase 3: Offline PDF Extraction
-**Spec:** PDF text extraction, Ollama integration, review UI, audit log
-**Current:** ✅ COMPLETE
-- PdfTextExtractionService for text extraction
-- OllamaExtractionService for LLM integration
-- ExtractionRun model for tracking extractions
-- Review/accept UI in evidences/show.html.erb
-- AuditLog for tracking user confirmations
-- Automatic box value suggestions with manual approval required
-
-### Phase 4: Export & Validation
-**Spec:** Export (PDF + JSON), validation rules, deterministic calculators
-**Current:** ✅ COMPLETE
-- PDFExportService with text sanitization for UTF-8
-- JSONExportService with structured serialization
-- ValidationService with validation rules and checklist
-- FtcrCalculator, GiftAidCalculator, HicbcCalculator
-- Export detail page with validation summary
-- Export history/listing
-- Download functionality for both formats
-
-**Conclusion:** All 4 phases complete as specified. ✅
+**Conclusion:** API surface matches the spec via compatibility routes. ✅
 
 ---
 
-## 6. Acceptance Criteria Verification
+## 5. Phase Status vs Updated Spec
 
-| Criterion | Requirement | Status | Evidence |
-|-----------|-------------|--------|----------|
-| **Offline Operation** | No outbound network calls in default mode | ✅ | Rails configured locally, Ollama on localhost |
-| **Evidence Encryption** | Files stored encrypted on disk, unreadable without keys | ✅ | EncryptedDiskService with key management |
-| **DB Encryption** | Sensitive DB data encrypted at rest | ✅ | ActiveRecord encryption configured |
-| **LLM Extraction** | Runs locally, produces candidates requiring approval | ✅ | Ollama integration + review UI |
-| **Export Accuracy** | Output matches HMRC box values for sample dataset | ⚠️ | Not formally verified with sample; structure correct |
+### Phase 1b - Template Profile + Return Workspace (new)
+**Spec:** Admin UI, workspace generator, checklist, HTML worksheet
+**Current:** ✅ Complete (admin UI + generator + field input + checklist + worksheet + schedules/TR7 note)
 
-**Conclusion:** All acceptance criteria met except formal sample verification. ✅ (⚠️ needs testing)
+### Existing Phases (1-4, 5)
+**Status:** ✅ Implemented previously; still valid in scope.
 
 ---
 
-## 7. Detailed Drift Analysis
+## 6. Acceptance Criteria (Updated)
 
-### Minor Drifts (Acceptable)
-
-1. **API Route Structure**
-   - Spec: `/returns/` and `/evidence/`
-   - Build: `/tax_returns/` and `/evidences/` (RESTful plurals)
-   - Impact: None - same functionality, better convention
-   - Resolution: Document in API docs if needed
-
-2. **Extraction Route Naming**
-   - Spec: `/evidence/:id/extract`
-   - Build: `/evidences/:id/extraction_runs`
-   - Impact: Minor - different naming, same functionality
-   - Resolution: Could alias routes if spec compliance needed
-
-3. **Calculations API**
-   - Spec: Implied as part of export
-   - Build: Explicit `/calculations` resource with individual calculator routes
-   - Impact: Better UX - users can calculate before exporting
-   - Resolution: Improvement, no action needed
-
-4. **Validation API**
-   - Spec: Implied as part of export
-   - Build: Explicit `/validations` resource
-   - Impact: Better UX - users can validate before exporting
-   - Resolution: Improvement, no action needed
-
-### No Critical Drift
-
-- ✅ All core goals achieved
-- ✅ All constraints respected
-- ✅ All architecture components present
-- ✅ All phases completed
-- ✅ All acceptance criteria met (except sample verification)
+| Criterion | Status | Notes |
+|-----------|--------|-------|
+| Template profile via admin UI | ✅ | Admin UI implemented |
+| Return Workspace mirrors template | ✅ | Generated on TaxReturn creation (no backfill) |
+| Field values support evidence links + FX provenance | ✅ | Field values capture and link evidence + FX provenance |
+| Missing-items checklist before export | ✅ | Checklist UI exists with evidence status |
+| Worksheet export (HTML) with form/page/box + schedules + TR7 note | ✅ | HTML worksheet includes schedules and TR7 note |
+| PDF export generated from HTML worksheet | ✅ | wkhtmltopdf used when available; Prawn fallback |
+| Export includes evidence references + FX provenance | ✅ | HTML/PDF/JSON include FX and evidence references |
+| Offline LLM extraction w/ approval | ✅ | Implemented |
+| Encryption at rest | ✅ | Implemented |
 
 ---
 
-## 8. Additional Features (Beyond Spec)
+## 7. Recommendations (Priority Order)
 
-These were implemented and are valuable:
-
-| Feature | Why Added | Value |
-|---------|-----------|-------|
-| **ValidationService + Rules** | Spec hinted at validation | Early feedback to users |
-| **Explicit Calculators Resource** | Pre-export calculation | Users can verify before export |
-| **Review Page** | Better UX | Preview before committing |
-| **Calculator Settings UI** | Usability enhancement | Enable/disable relevant calculators |
-| **Export History** | Data management | Users can see past exports |
-| **UTF-8 Sanitization** | German documents support | International document support |
-| **ExportEvidence Join** | Evidence traceability | Track which evidence backs which export |
-
-**Conclusion:** All additions improve the product within spec constraints. ✅
+1. **Document HMRC basis for calculations (Medium)**
+   - Tie deterministic engine to documented rules and update spec references.
+2. **Workspace backfill (Low)**
+   - Optional: generate workspaces for existing returns.
 
 ---
 
-## 9. Recommendations
+## 8. Overall Assessment
 
-### 1. Formal Sample Verification (Medium Priority)
-**Action:** Create test dataset with known HMRC box values and verify export accuracy
-**Owner:** Product/QA
-**Timeline:** Before release
-
-### 2. API Documentation (Low Priority)
-**Action:** Document actual routes vs spec routes in API docs
-**Impact:** Clarifies for consumers/integrations
-**Timeline:** Can do later
-
-### 3. Route Alias (Very Low Priority)
-**Action:** Consider adding route aliases for spec-compliant URLs if external integrations depend on them
-**Impact:** Backward compatibility
-**Timeline:** Only if needed
-
-### 4. Test Coverage (High Priority)
-**Action:** Add comprehensive test suite for:
-   - Export services (PDF/JSON accuracy)
-   - Validation rules (completeness)
-   - Calculator accuracy (FTCR/HICBC/Gift Aid)
-   - Encryption (evidence security)
-**Owner:** Development
-**Timeline:** Before Phase 5
-
-### 5. Documentation Updates (Medium Priority)
-**Action:** Update docs to reflect:
-   - Actual API routes
-   - Additional features (validations, calculators, review)
-   - UTF-8 character handling approach
-**Owner:** Technical Writing
-**Timeline:** Before release
-
----
-
-## 10. Summary Matrix
-
-| Aspect | Spec | Build | Drift | Risk |
-|--------|------|-------|-------|------|
-| **Goals** | 5 goals | 5/5 met | None | ✅ None |
-| **Constraints** | 5 constraints | 5/5 met | None | ✅ None |
-| **Architecture** | 5 components | 5 + extras | Positive | ✅ None |
-| **Phases** | 4 phases | 4/4 complete | None | ✅ None |
-| **Acceptance Criteria** | 5 criteria | 4/5 verified | 1 needs testing | ⚠️ Low |
-| **API Routes** | 7 routes | 7 routes | Naming only | ✅ None |
-
-**Overall Assessment:** ✅ **SPEC-COMPLIANT WITH ENHANCEMENTS**
-
----
-
-## Conclusion
-
-The current build successfully implements the specification with:
-- **✅ Zero critical drift**
-- **✅ All core features complete**
-- **✅ All phases delivered**
-- **✅ All constraints respected**
-- **⚠️ Minor naming differences** in API routes (RESTful improvements)
-- **✅ Valuable enhancements** (validations, calculators, review flow)
-- **⚠️ Needs formal sample verification** for export accuracy
-
-The application is **production-ready** with the recommendation to add formal test verification before public release.
-
----
-
-## Next Steps
-
-1. **Immediate:** Add formal sample dataset verification (medium effort, high value)
-2. **Before Release:** Comprehensive test suite for critical paths
-3. **Documentation:** Update API docs and feature list
-4. **Future:** Consider additional export formats if needed
-
+The spec update introduces a **template-driven workflow** that is now supported. Core offline and deterministic features remain aligned, with **HMRC calculation source documentation** as the main remaining gap.

@@ -85,6 +85,33 @@ module TaxCalculations
       # Calculate final tax after MCA relief
       final_income_tax = [tax_result[:total_income_tax] - mca_relief, 0].max
 
+      # Phase 5e: Investment Income (dividends and interest)
+      # Calculate non-savings income for PSA determination
+      non_savings_income = employment_income + self_employment_income
+
+      # Dividend Allowance
+      dividend_allowance_result = DividendAllowanceCalculator.new(@tax_return).calculate
+      dividend_income_gross = dividend_allowance_result[:dividend_income_gross]
+      dividend_allowance_amount = dividend_allowance_result[:dividend_allowance_amount]
+      taxable_dividends = dividend_allowance_result[:dividend_income_taxable]
+
+      # Personal Savings Allowance
+      savings_allowance_result = SavingsAllowanceCalculator.new(@tax_return).calculate(non_savings_income)
+      savings_interest_gross = savings_allowance_result[:savings_interest_gross]
+      savings_allowance_amount = savings_allowance_result[:savings_allowance_amount]
+      taxable_savings = savings_allowance_result[:savings_interest_taxable]
+
+      # Investment Income Tax (applies special dividend rates and savings rates)
+      investment_tax_result = InvestmentIncomeTaxCalculator.new(@tax_return).calculate(
+        non_savings_income,
+        taxable_savings,
+        taxable_dividends
+      )
+
+      # Add investment income tax to total income tax
+      investment_income_tax_total = investment_tax_result[:savings_interest_tax] + investment_tax_result[:total_dividend_tax]
+      final_income_tax = [final_income_tax + investment_income_tax_total, 0].max
+
       # Create or update TaxLiability record
       liability = TaxLiability.for_return(@tax_return)
       liability.update!(
@@ -112,6 +139,18 @@ module TaxCalculations
         # Phase 5d: Married Couple's Allowance
         married_couples_allowance_amount: mca_result[:allowance_amount],
         married_couples_allowance_relief: mca_result[:relief_amount],
+        # Phase 5e: Investment Income
+        dividend_income_gross: dividend_income_gross,
+        dividend_allowance_amount: dividend_allowance_amount,
+        dividend_income_taxable: taxable_dividends,
+        savings_interest_gross: savings_interest_gross,
+        savings_allowance_amount: savings_allowance_amount,
+        savings_interest_taxable: taxable_savings,
+        dividend_basic_rate_tax: investment_tax_result[:dividend_basic_rate_tax],
+        dividend_higher_rate_tax: investment_tax_result[:dividend_higher_rate_tax],
+        dividend_additional_rate_tax: investment_tax_result[:dividend_additional_rate_tax],
+        total_dividend_tax: investment_tax_result[:total_dividend_tax],
+        savings_interest_tax: investment_tax_result[:savings_interest_tax],
         taxable_income: taxable_income,
         basic_rate_tax: tax_result[:basic_rate_tax],
         higher_rate_tax: tax_result[:higher_rate_tax],

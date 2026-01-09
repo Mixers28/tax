@@ -11,6 +11,7 @@ class Evidence < ApplicationRecord
   has_many :extraction_runs, dependent: :destroy
   has_many :evidence_box_values, dependent: :destroy
   has_many :box_values, through: :evidence_box_values
+  has_many :evidence_links, dependent: :destroy
   has_many :export_evidences, dependent: :destroy
   has_many :exports, through: :export_evidences
 

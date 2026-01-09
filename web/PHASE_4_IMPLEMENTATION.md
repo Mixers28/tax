@@ -92,7 +92,7 @@ Three deterministic calculator services implemented:
 - Deterministic output for reproducibility
 - Evidence chain-of-custody tracking
 
-#### JSONExportService (`app/services/json_export_service.rb`)
+#### JsonExportService (`app/services/json_export_service.rb`)
 - Generates machine-readable JSON exports
 - Includes all data in structured format
 - Contains metadata, validations, calculations, audit trail

@@ -51,6 +51,18 @@ class TaxLiability < ApplicationRecord
       # Phase 5d: Married Couple's Allowance
       married_couples_allowance_amount: married_couples_allowance_amount,
       married_couples_allowance_relief: married_couples_allowance_relief,
+      # Phase 5e: Investment Income
+      dividend_income_gross: dividend_income_gross,
+      dividend_allowance_amount: dividend_allowance_amount,
+      dividend_income_taxable: dividend_income_taxable,
+      savings_interest_gross: savings_interest_gross,
+      savings_allowance_amount: savings_allowance_amount,
+      savings_interest_taxable: savings_interest_taxable,
+      dividend_basic_rate_tax: dividend_basic_rate_tax,
+      dividend_higher_rate_tax: dividend_higher_rate_tax,
+      dividend_additional_rate_tax: dividend_additional_rate_tax,
+      total_dividend_tax: total_dividend_tax,
+      savings_interest_tax: savings_interest_tax,
       taxable_income: taxable_income,
       total_income_tax: total_income_tax,
       class_1_ni: class_1_ni,

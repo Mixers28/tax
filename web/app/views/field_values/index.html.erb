@@ -1,0 +1,395 @@
+<div class="container">
+  <div class="field-values-page">
+    <div class="header">
+      <div class="back-link">
+        <%= link_to "← Back to Tax Return", tax_return_path(@tax_return) %>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle>Theme: Auto</button>
+      </div>
+      <h1>Workspace Fields</h1>
+      <p class="subtitle">Capture values, evidence links, and FX provenance</p>
+    </div>
+
+    <% if @template_profile.nil? %>
+      <div class="empty-state">
+        <p>No template profile yet. Workspace fields are optional.</p>
+        <p class="empty-subtitle">You can still export a worksheet from box values.</p>
+        <div class="empty-actions">
+          <%= link_to "Create Template Profile", new_template_profile_path, class: "btn btn-primary" %>
+          <%= link_to "View Worksheet", worksheet_tax_return_path(@tax_return), class: "btn btn-secondary" %>
+        </div>
+      </div>
+    <% elsif @field_values.empty? %>
+      <div class="empty-state">
+        <p>No workspace fields found. Add fields to the template profile.</p>
+        <%= link_to "Manage Template Profile", template_profile_path, class: "btn btn-primary" %>
+      </div>
+    <% else %>
+      <div class="field-values-list">
+        <% @field_values.each do |field_value| %>
+          <% field = field_value.template_field %>
+          <% box = field.box_definition %>
+          <div class="field-card">
+            <div class="field-heading">
+              <strong><%= box&.box_code || "Custom" %></strong>
+              <span class="field-label"><%= field.label.presence || box&.hmrc_label || "Custom field" %></span>
+              <% if field.required? %>
+                <span class="tag tag-required">Required</span>
+              <% end %>
+            </div>
+
+            <%= form_with model: field_value, url: tax_return_field_value_path(@tax_return, field_value), method: :patch, local: true do |form| %>
+              <div class="form-grid">
+                <div class="form-row">
+                  <%= form.label :value_raw, "Value" %>
+                  <%= form.text_field :value_raw, class: "text-input" %>
+                </div>
+                <div class="form-row">
+                  <%= form.label :note, "Notes" %>
+                  <%= form.text_area :note, rows: 2, class: "text-area" %>
+                </div>
+                <div class="form-row checkbox-row">
+                  <%= form.check_box :confirmed, { checked: field_value.confirmed_at.present? }, "1", "0" %>
+                  <%= form.label :confirmed, "Confirmed" %>
+                </div>
+                <div class="form-row">
+                  <%= form.label :evidence_id, "Link Evidence" %>
+                  <%= form.collection_select :evidence_id, @evidences, :id, :filename, { include_blank: "Select evidence" }, class: "text-input" %>
+                  <% if field_value.evidence_links.any? %>
+                    <div class="inline-note">Linked: <%= field_value.evidence_links.map { |link| link.evidence.filename }.join(", ") %></div>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="fx-section">
+                <h4>FX Provenance (optional)</h4>
+                <div class="form-grid">
+                  <div class="form-row">
+                    <label>Original Amount</label>
+                    <input type="text" name="fx_provenance[original_amount]" value="<%= field_value.fx_provenance&.original_amount %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>Original Currency</label>
+                    <input type="text" name="fx_provenance[original_currency]" value="<%= field_value.fx_provenance&.original_currency %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>GBP Amount</label>
+                    <input type="text" name="fx_provenance[gbp_amount]" value="<%= field_value.fx_provenance&.gbp_amount %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>Exchange Rate</label>
+                    <input type="text" name="fx_provenance[exchange_rate]" value="<%= field_value.fx_provenance&.exchange_rate %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>Rate Method</label>
+                    <input type="text" name="fx_provenance[rate_method]" value="<%= field_value.fx_provenance&.rate_method %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>Rate Period</label>
+                    <input type="text" name="fx_provenance[rate_period]" value="<%= field_value.fx_provenance&.rate_period %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>Rate Source</label>
+                    <input type="text" name="fx_provenance[rate_source]" value="<%= field_value.fx_provenance&.rate_source %>" class="text-input">
+                  </div>
+                  <div class="form-row">
+                    <label>FX Notes</label>
+                    <textarea name="fx_provenance[note]" rows="2" class="text-area"><%= field_value.fx_provenance&.note %></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <%= form.submit "Save Field", class: "btn btn-primary" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  :root {
+    color-scheme: light dark;
+    --paper: #f7f4ee;
+    --paper-alt: #fbfaf6;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --accent: #0f4c5c;
+    --accent-strong: #0b3742;
+    --border: #e2e8f0;
+  }
+
+  .container {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(90deg, rgba(15, 76, 92, 0.05) 0, rgba(15, 76, 92, 0.05) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(15, 76, 92, 0.04) 31px, rgba(15, 76, 92, 0.04) 32px);
+    background-size: 96px 100%, 100% 32px;
+    min-height: 100vh;
+    padding: 1rem;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  }
+
+  .field-values-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #0b1f2a 100%);
+    color: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    position: relative;
+  }
+
+  .header-actions {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .theme-toggle {
+    border: 1px solid rgba(248, 250, 252, 0.35);
+    background: rgba(248, 250, 252, 0.12);
+    color: #f8fafc;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .back-link a {
+    color: white;
+    text-decoration: none;
+  }
+
+  .subtitle {
+    opacity: 0.9;
+    margin-top: 0.5rem;
+  }
+
+  .field-values-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .field-card {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .field-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .field-label {
+    color: var(--muted);
+  }
+
+  .tag-required {
+    background: #fde68a;
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .text-input,
+  .text-area {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--paper-alt);
+    color: var(--ink);
+  }
+
+  .text-input:focus,
+  .text-area:focus {
+    outline: 2px solid rgba(15, 76, 92, 0.2);
+    border-color: var(--accent);
+  }
+
+  .checkbox-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .inline-note {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .empty-subtitle {
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  .empty-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .fx-section {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+
+  .form-actions {
+    margin-top: 1rem;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0b1116;
+      --paper-alt: #0f172a;
+      --card: #0f172a;
+      --ink: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #2dd4bf;
+      --accent-strong: #14b8a6;
+      --border: #1f2937;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0b141b 0%, #0b1f2a 100%);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .tag-required {
+      background: rgba(253, 230, 138, 0.2);
+      color: #fcd34d;
+    }
+  }
+
+  html[data-theme="dark"] {
+    --paper: #0b1116;
+    --paper-alt: #0f172a;
+    --card: #0f172a;
+    --ink: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #2dd4bf;
+    --accent-strong: #14b8a6;
+    --border: #1f2937;
+  }
+
+  html[data-theme="dark"] .header {
+    background: linear-gradient(135deg, #0b141b 0%, #0b1f2a 100%);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  html[data-theme="dark"] .tag-required {
+    background: rgba(253, 230, 138, 0.2);
+    color: #fcd34d;
+  }
+
+  html[data-theme="light"] {
+    --paper: #f7f4ee;
+    --paper-alt: #fbfaf6;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --accent: #0f4c5c;
+    --accent-strong: #0b3742;
+    --border: #e2e8f0;
+  }
+
+  .btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+
+  .empty-state {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 768px) {
+    .header {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const themeButtons = Array.from(document.querySelectorAll("[data-theme-toggle]"));
+    const themeKey = "theme";
+    const themeOrder = ["auto", "dark", "light"];
+
+    const normalizeTheme = (value) => (themeOrder.includes(value) ? value : "auto");
+    const applyTheme = (value) => {
+      const theme = normalizeTheme(value);
+      if (theme === "auto") {
+        document.documentElement.removeAttribute("data-theme");
+      } else {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+      themeButtons.forEach((button) => {
+        button.textContent = `Theme: ${theme.charAt(0).toUpperCase()}${theme.slice(1)}`;
+      });
+    };
+
+    applyTheme(localStorage.getItem(themeKey));
+
+    themeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = normalizeTheme(localStorage.getItem(themeKey));
+        const next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
+        localStorage.setItem(themeKey, next);
+        applyTheme(next);
+      });
+    });
+  });
+</script>

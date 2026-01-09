@@ -61,14 +61,22 @@ class PDFExportService
     pdf_text "Section 1: Box Values", size: 16, weight: :bold
     @pdf.move_down 10
 
-    box_values = @tax_return.box_values.includes(:box_definition).to_a
+    box_values = @tax_return.box_values.includes(:box_definition, :evidences, :fx_provenance).to_a
 
     if box_values.any?
       box_values.each do |bv|
         value_display = bv.value_gbp.present? ? "£#{bv.value_gbp}" : bv.value_raw.to_s
         status = bv.value_raw.present? ? "Filled" : "Empty"
+        evidence_names = bv.evidences.map(&:filename).compact
+        fx_summary = format_fx(bv.fx_provenance)
 
         pdf_text "Box #{bv.box_definition.box_code}: #{value_display} [#{status}]", size: 11
+        if evidence_names.any?
+          pdf_text "  Evidence: #{evidence_names.join(", ")}", size: 9, color: "555555"
+        end
+        if fx_summary.present?
+          pdf_text "  FX: #{fx_summary}", size: 9, color: "555555"
+        end
       end
     else
       pdf_text "No box values entered", style: :italic, color: "999999"
@@ -146,6 +154,19 @@ class PDFExportService
     else
       pdf_text "No evidence files", style: :italic, color: "999999"
     end
+  end
+
+  def format_fx(fx_provenance)
+    return nil unless fx_provenance
+
+    parts = []
+    if fx_provenance.original_amount.present? && fx_provenance.original_currency.present?
+      parts << "#{fx_provenance.original_amount} #{fx_provenance.original_currency}"
+    end
+    parts << "GBP #{fx_provenance.gbp_amount}" if fx_provenance.gbp_amount.present?
+    parts << "@ #{fx_provenance.exchange_rate}" if fx_provenance.exchange_rate.present?
+    parts << fx_provenance.rate_source if fx_provenance.rate_source.present?
+    parts.empty? ? nil : parts.join(" ")
   end
 
   def store_pdf
